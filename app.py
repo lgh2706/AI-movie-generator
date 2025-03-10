@@ -116,7 +116,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
     video_writer.release()
     time.sleep(2)  # Ensure the file is written before proceeding
 
-    # Debug: Check if video file exists
+    # Debug: Check if video was generated
     if not os.path.exists("temp_video.mp4") or os.path.getsize("temp_video.mp4") == 0:
         print("❌ Error: temp_video.mp4 was not generated correctly!")
         return None
@@ -135,18 +135,13 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
     try:
         print("🔄 Merging video and audio with FFmpeg...")
 
+        input_video = ffmpeg.input("temp_video.mp4")  # Video input
+        input_audio = ffmpeg.input(audio_file)  # Audio input
+
         process = (
             ffmpeg
-            .input("temp_video.mp4", format="mp4")  # Video input
-            .input(audio_file, format="mp3")  # Audio input
-            .output(
-                output_file,
-                vcodec="libx264",
-                acodec="aac",
-                strict="experimental",
-                shortest=True,
-                audio_bitrate="192k"
-            )
+            .concat(input_video, input_audio, v=1, a=1)  # Merge video and audio
+            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
             .run(overwrite_output=True)
         )
 
@@ -165,6 +160,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
