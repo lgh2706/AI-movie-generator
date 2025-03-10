@@ -74,10 +74,11 @@ import ffmpeg
 import cv2
 import requests
 import os
+import time
 
 # Function to generate AI video from images and narration
 def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4"):
-    print("Starting AI video generation...")
+    print("🎬 Starting AI video generation...")
 
     # Download AI-generated image
     image_response = requests.get(image_url, stream=True)
@@ -97,8 +98,11 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
 
     height, width, _ = img.shape
     video_fps = 30
-    duration = 10  # 10 seconds
+    duration = 10  # Force duration to be 10 seconds
     frame_count = video_fps * duration
+
+    # Debug: Check frame count
+    print(f"🟢 Generating {frame_count} frames for {duration} seconds at {video_fps} FPS")
 
     # Create a video writer
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -108,8 +112,10 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
     for _ in range(frame_count):
         video_writer.write(img)
 
-    # Release the video writer
+    # Release the video writer properly
     video_writer.release()
+    time.sleep(2)  # Ensure the file is written before proceeding
+
     print("✅ temp_video.mp4 generated successfully!")
 
     # Ensure audio file exists before merging
@@ -125,13 +131,13 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
     # Merge video and voice narration using FFmpeg
     try:
         print("🔄 Merging video and audio with FFmpeg...")
+
         input_video = ffmpeg.input("temp_video.mp4")  # Video input
         input_audio = ffmpeg.input(audio_file)  # Audio input
 
         process = (
             ffmpeg
-            .concat(input_video, input_audio, v=1, a=1)  # Merge video and audio
-            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
+            .output(input_video, input_audio, output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
             .run(overwrite_output=True)
         )
 
@@ -150,6 +156,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
