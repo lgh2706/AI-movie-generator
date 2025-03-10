@@ -70,8 +70,13 @@ def generate_voice_narration(text):
 
 
 
+import ffmpeg
+import cv2
+import requests
+import os
+
 # Function to generate AI video from images, narration, and music
-def generate_ai_video(image_url, audio_file, music_file, output_file="ai_movie_trailer.mp4"):
+def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4"):
     # Download AI-generated image
     image_response = requests.get(image_url, stream=True)
     if image_response.status_code == 200:
@@ -96,10 +101,14 @@ def generate_ai_video(image_url, audio_file, music_file, output_file="ai_movie_t
     # Release the video writer
     video_writer.release()
 
-    # Merge voice and music into video
-    ffmpeg.input(output_file).output(audio_file, music_file, vcodec="libx264").run()
+    # Ensure audio file exists before merging
+    if os.path.exists(audio_file):
+        ffmpeg.input(output_file).output(audio_file, vcodec="libx264", acodec="aac").run()
+    else:
+        print("Error: Audio file not found!")
 
     return output_file
+
 
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
@@ -141,7 +150,7 @@ if st.session_state.audio_file:
 # Generate and play AI movie trailer
 if st.button("Generate AI Movie Trailer"):
     if st.session_state.movie_image_url and st.session_state.audio_file and "music_file" in st.session_state:
-        st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url, st.session_state.audio_file, st.session_state.music_file)
+        st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url, st.session_state.audio_file)
         st.video(st.session_state.video_file)
     else:
         st.warning("Generate script, image, narration, and music first!")
