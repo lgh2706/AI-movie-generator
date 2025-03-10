@@ -92,7 +92,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
 
     # Create a video writer
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(output_file, fourcc, video_fps, (width, height))
+    video_writer = cv2.VideoWriter("temp_video.mp4", fourcc, video_fps, (width, height))
 
     # Add frames with AI-generated image
     for _ in range(frame_count):
@@ -103,7 +103,13 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
 
     # Ensure audio file exists before merging
     if os.path.exists(audio_file):
-        ffmpeg.input(output_file).output(audio_file, vcodec="libx264", acodec="aac").run()
+        (
+            ffmpeg
+            .input("temp_video.mp4")
+            .input(audio_file)
+            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=None)
+            .run(overwrite_output=True)
+        )
     else:
         print("Error: Audio file not found!")
 
