@@ -77,7 +77,7 @@ import os
 import time
 
 # Function to generate AI video from images and narration
-def generate_ai_video(image_url, audio_file,):
+def generate_ai_video(image_url, audio_file):
     print("🎬 Starting AI video generation...")
 
  
