@@ -116,33 +116,42 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
     video_writer.release()
     time.sleep(2)  # Ensure the file is written before proceeding
 
-    print("✅ temp_video.mp4 generated successfully!")
+    # Debug: Check if video file exists
+    if not os.path.exists("temp_video.mp4") or os.path.getsize("temp_video.mp4") == 0:
+        print("❌ Error: temp_video.mp4 was not generated correctly!")
+        return None
 
     # Ensure audio file exists before merging
-    if not os.path.exists(audio_file):
-        print("❌ Error: Audio file not found!")
-        return None  # Stop execution if no audio file
+    if not os.path.exists(audio_file) or os.path.getsize(audio_file) == 0:
+        print("❌ Error: Audio file not found or is empty!")
+        return None  # Stop execution if no valid audio file
 
-    # Debug: Check if temp_video.mp4 exists
+    # Debug: Check if temp_video.mp4 exists before merging
     if not os.path.exists("temp_video.mp4"):
-        print("❌ Error: Video file not found!")
+        print("❌ Error: Video file not found before merging!")
         return None  # Stop execution if no video file
 
     # Merge video and voice narration using FFmpeg
     try:
         print("🔄 Merging video and audio with FFmpeg...")
 
-        input_video = ffmpeg.input("temp_video.mp4")  # Video input
-        input_audio = ffmpeg.input(audio_file)  # Audio input
-
         process = (
             ffmpeg
-            .output(input_video, input_audio, output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
+            .input("temp_video.mp4", format="mp4")  # Video input
+            .input(audio_file, format="mp3")  # Audio input
+            .output(
+                output_file,
+                vcodec="libx264",
+                acodec="aac",
+                strict="experimental",
+                shortest=True,
+                audio_bitrate="192k"
+            )
             .run(overwrite_output=True)
         )
 
         # Debugging: Check if the output file exists
-        if os.path.exists(output_file):
+        if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
             print(f"✅ Video successfully generated: {output_file}")
             return output_file
         else:
