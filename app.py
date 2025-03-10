@@ -106,14 +106,14 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         (
             ffmpeg
             .input("temp_video.mp4")
-            .input(audio_file)
-            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=None)
+            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=None, audio_bitrate="192k", input=ffmpeg.input(audio_file))
             .run(overwrite_output=True)
         )
     else:
         print("Error: Audio file not found!")
 
     return output_file
+
 
 
 # Streamlit UI
