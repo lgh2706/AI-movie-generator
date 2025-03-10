@@ -138,6 +138,9 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         input_video = ffmpeg.input("temp_video.mp4")  # Video input
         input_audio = ffmpeg.input(audio_file)  # Audio input
 
+        if not output_file or output_file == "True":
+            output_file = "final_ai_movie_trailer.mp4"  # Ensure valid output file
+
         process = (
             ffmpeg
             .output(
@@ -168,6 +171,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
