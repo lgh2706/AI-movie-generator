@@ -1,18 +1,29 @@
 import os
 import openai
 import streamlit as st
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+import io
+import requests
+import elevenlabs
+from pydub import AudioSegment
+from pydub.playback import play
 
 # Load API key from environment variable
 API_KEY = os.getenv("OPENAI_API_KEY")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 # Set OpenAI API key
 openai.api_key = API_KEY
 
-# Initialize session state to store script & image URL
+# Initialize session state to store script, image, and audio
 if "movie_script" not in st.session_state:
     st.session_state.movie_script = ""
 if "movie_image_url" not in st.session_state:
     st.session_state.movie_image_url = ""
+if "audio_file" not in st.session_state:
+    st.session_state.audio_file = ""
 
 # Function to generate movie script
 def generate_movie_script(user_prompt):
@@ -35,9 +46,21 @@ def generate_movie_image(prompt):
     )
     return response.data[0].url
 
+# Function to generate AI voice narration
+def generate_voice_narration(text):
+    audio = elevenlabs.generate(
+        text=text,
+        voice="Rachel",
+        api_key=ELEVENLABS_API_KEY
+    )
+    audio_file = "ai_voice_narration.mp3"
+    with open(audio_file, "wb") as f:
+        f.write(audio)
+    return audio_file
+
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
-st.subheader("Generate AI-powered movie scripts with visuals!")
+st.subheader("Generate AI-powered movie scripts with visuals & voice narration!")
 
 # User input for movie idea
 user_prompt = st.text_input("Enter your movie idea:", "A cyberpunk heist thriller")
@@ -51,6 +74,9 @@ if st.button("Generate Movie Script & Image"):
         image_prompt = f"An epic scene from the movie: {user_prompt}"
         st.session_state.movie_image_url = generate_movie_image(image_prompt)
 
+        # Generate AI voice narration
+        st.session_state.audio_file = generate_voice_narration(st.session_state.movie_script)
+
 # Display the stored script
 if st.session_state.movie_script:
     st.text_area("Generated Movie Script", st.session_state.movie_script, height=400)
@@ -58,4 +84,9 @@ if st.session_state.movie_script:
 # Display the stored image
 if st.session_state.movie_image_url:
     st.image(st.session_state.movie_image_url, caption="AI-Generated Movie Scene", use_container_width=True)
-st.markdown("🚀 *Powered by OpenAI GPT-4 & DALL·E 3*")
+
+# Play AI voice narration
+if st.session_state.audio_file:
+    st.audio(st.session_state.audio_file, format="audio/mp3")
+
+st.markdown("🚀 *Powered by OpenAI GPT-4, DALL·E 3 & ElevenLabs AI*")
