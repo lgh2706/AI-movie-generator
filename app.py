@@ -47,11 +47,11 @@ def generate_movie_image(prompt):
 
 
 
-from elevenlabs import generate, save
+
 
 # Function to generate AI voice narration using ElevenLabs
 def generate_voice_narration(text):
-    audio = generate(
+    audio = elevenlabs.generate(
         text=text,
         voice="Rachel",
         model="eleven_multilingual_v2",
@@ -60,7 +60,8 @@ def generate_voice_narration(text):
 
     # Save the generated voice file
     audio_file = "ai_voice_narration.mp3"
-    save(audio, audio_file)
+    with open(audio_file, "wb") as f:
+        f.write(audio)
 
     return audio_file
 
