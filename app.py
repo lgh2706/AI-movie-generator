@@ -7,7 +7,7 @@ from reportlab.lib.utils import ImageReader
 import io
 import requests
 import elevenlabs
-import riffusion
+import suno
 import cv2
 import ffmpeg
 import numpy as np
@@ -69,18 +69,20 @@ def generate_voice_narration(text):
 
     return audio_file
 
-# Function to generate AI background music
+
+
+# Function to generate AI background music using Suno AI
 def generate_background_music(movie_prompt):
-    # Generate AI music using the movie's theme
-    audio = riffusion.generate_audio(
+    music = suno.generate_music(
         prompt=movie_prompt,
-        duration=30  # 30 seconds of background music
+        style="cinematic",
+        duration=30  # Generate 30 seconds of background music
     )
 
     # Save the generated music file
     music_file = "ai_background_music.mp3"
     with open(music_file, "wb") as f:
-        f.write(audio)
+        f.write(music)
 
     return music_file
 
