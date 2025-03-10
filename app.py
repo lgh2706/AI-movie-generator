@@ -45,17 +45,16 @@ def generate_movie_image(prompt):
     )
     return response.data[0].url
 
-from elevenlabs import generate, Voice, VoiceSettings
+from elevenlabs.client import ElevenLabs
+
+# Initialize ElevenLabs API client
+elevenlabs_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
 
 # Function to generate AI voice narration using ElevenLabs
 def generate_voice_narration(text):
-    audio = generate(
+    audio = elevenlabs_client.text_to_speech.convert(
         text=text,
-        voice=Voice(
-            voice_id="Rachel",
-            settings=VoiceSettings(stability=0.5, similarity_boost=0.8)
-        ),
-        api_key=ELEVENLABS_API_KEY
+        voice="Rachel"
     )
 
     # Save the generated voice file
@@ -64,6 +63,7 @@ def generate_voice_narration(text):
         f.write(audio)
 
     return audio_file
+
 
 
 # Streamlit UI
