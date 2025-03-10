@@ -140,8 +140,16 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
 
         process = (
             ffmpeg
-            .concat(input_video, input_audio, v=1, a=1)  # Merge video and audio
-            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
+            .output(
+                input_video,
+                input_audio,
+                output_file,
+                vcodec="libx264",
+                acodec="aac",
+                strict="experimental",
+                shortest=True,  # Ensures the final video ends when the shortest stream (video) ends
+                audio_bitrate="192k"
+            )
             .run(overwrite_output=True)
         )
 
@@ -160,6 +168,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
