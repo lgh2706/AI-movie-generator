@@ -53,7 +53,7 @@ def generate_movie_image(prompt):
 def generate_voice_narration(text):
     audio = elevenlabs.generate(
         text=text,
-        voice="Laura",
+        voice="Miruna",
         model="eleven_multilingual_v2",
         api_key=ELEVENLABS_API_KEY
     )
