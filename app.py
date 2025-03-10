@@ -47,10 +47,10 @@ def generate_movie_image(prompt):
 
 # Function to generate AI voice narration using ElevenLabs
 def generate_voice_narration(text):
-    audio = elevenlabs.generate(
-        text=text,
+    audio = elevenlabs.text_to_speech(
+        api_key=ELEVENLABS_API_KEY,
         voice="Rachel",
-        api_key=ELEVENLABS_API_KEY
+        text=text
     )
 
     # Save the generated voice file
