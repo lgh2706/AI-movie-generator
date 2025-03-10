@@ -13,11 +13,11 @@ def generate_movie_script(user_prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "You are a professional Hollywood screenwriter. Write a creative, engaging movie script with scenes, characters, and dialogue."},
+            {"role": "system", "content": "You are a Hollywood screenwriter. Write a detailed, engaging movie script including scenes, characters, and dialogue."},
             {"role": "user", "content": user_prompt}
         ]
     )
-    return response.choices[0].message["content"]
+    return response["choices"][0]["message"]["content"]
 
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
