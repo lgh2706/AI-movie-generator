@@ -116,10 +116,12 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
 
     # Merge video and voice narration using FFmpeg
     try:
+        input_video = ffmpeg.input("temp_video.mp4")  # Video input
+        input_audio = ffmpeg.input(audio_file)  # Audio input
+
         (
             ffmpeg
-            .input("temp_video.mp4")  # AI-generated image video
-            .input(audio_file)  # AI voice narration
+            .concat(input_video, input_audio, v=1, a=1)  # Merge video and audio
             .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
             .run(overwrite_output=True)
         )
@@ -127,6 +129,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
     except ffmpeg.Error as e:
         print("FFmpeg error:", e.stderr.decode())
         return None  # Stop execution if FFmpeg fails
+
 
 
 
