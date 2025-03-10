@@ -137,6 +137,11 @@ def generate_ai_video(image_url, audio_file, output_file=None):
         print("❌ Error: Video file not found before merging!")
         return None  # Stop execution if no video file
 
+    # Debug: Check input files before running FFmpeg
+    print(f"🔎 Checking input files before FFmpeg execution:")
+    print(f"🎥 Video file: temp_video.mp4 (Size: {os.path.getsize('temp_video.mp4')} bytes)")
+    print(f"🎙️ Audio file: {audio_file} (Size: {os.path.getsize(audio_file)} bytes)")
+
     print(f"🔄 Merging video and audio with FFmpeg... Output file: {output_file}")
 
     # Merge video and voice narration using FFmpeg
@@ -156,7 +161,7 @@ def generate_ai_video(image_url, audio_file, output_file=None):
                 shortest=True,  # Ensures video and audio end together
                 audio_bitrate="192k"
             )
-            .run(overwrite_output=True)
+            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
 
         # Debugging: Check if the output file exists
