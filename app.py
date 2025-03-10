@@ -234,7 +234,7 @@ if st.session_state.audio_file:
 # Generate and play AI movie trailer
 if st.button("Generate AI Movie Trailer"):
     if st.session_state.movie_image_url and st.session_state.audio_file and "music_file" in st.session_state:
-        st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url, st.session_state.audio_file)
+        st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url, st.session_state.audio_file, "final_ai_movie_trailer.mp4")
         st.video(st.session_state.video_file)
     else:
         st.warning("Generate script, image, narration, and music first!")
