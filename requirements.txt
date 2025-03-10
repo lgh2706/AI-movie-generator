@@ -7,3 +7,4 @@ pydub
 reportlab==3.6.12
 opencv-python
 ffmpeg-python
+opencv-python-headless
