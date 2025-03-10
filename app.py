@@ -8,15 +8,14 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 # Set OpenAI API key
 openai.api_key = API_KEY
 
-# Function to generate movie script
+# Function to generate movie script using new OpenAI API format
 def generate_movie_script(user_prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a Hollywood screenwriter creating movie scripts."},
             {"role": "user", "content": f"Generate a detailed movie script for: {user_prompt}"}
-        ],
-        max_tokens=1000
+        ]
     )
     return response["choices"][0]["message"]["content"]
 
