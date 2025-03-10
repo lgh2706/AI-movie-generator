@@ -7,6 +7,10 @@ from reportlab.lib.utils import ImageReader
 import io
 import requests
 import elevenlabs
+import riffusion
+import cv2
+import ffmpeg
+import numpy as np
 from pydub import AudioSegment
 
 # Load API keys from environment variables
@@ -16,13 +20,17 @@ ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 # Set OpenAI API key
 openai.api_key = OPENAI_API_KEY
 
-# Initialize session state to store script, image, and audio
+# Initialize session state to store script, image, music, and video
 if "movie_script" not in st.session_state:
     st.session_state.movie_script = ""
 if "movie_image_url" not in st.session_state:
     st.session_state.movie_image_url = ""
 if "audio_file" not in st.session_state:
     st.session_state.audio_file = ""
+if "music_file" not in st.session_state:
+    st.session_state.music_file = ""
+if "video_file" not in st.session_state:
+    st.session_state.video_file = ""
 
 # Function to generate movie script using OpenAI GPT-4
 def generate_movie_script(user_prompt):
@@ -45,15 +53,11 @@ def generate_movie_image(prompt):
     )
     return response.data[0].url
 
-
-
-
-
 # Function to generate AI voice narration using ElevenLabs
 def generate_voice_narration(text):
     audio = elevenlabs.generate(
         text=text,
-        voice="Miruna",
+        voice="Miruna",  # Replace with a valid voice from ElevenLabs
         model="eleven_multilingual_v2",
         api_key=ELEVENLABS_API_KEY
     )
@@ -64,9 +68,21 @@ def generate_voice_narration(text):
         f.write(audio)
 
     return audio_file
-import cv2
-import ffmpeg
-import numpy as np
+
+# Function to generate AI background music
+def generate_background_music(movie_prompt):
+    # Generate AI music using the movie's theme
+    audio = riffusion.generate_audio(
+        prompt=movie_prompt,
+        duration=30  # 30 seconds of background music
+    )
+
+    # Save the generated music file
+    music_file = "ai_background_music.mp3"
+    with open(music_file, "wb") as f:
+        f.write(audio)
+
+    return music_file
 
 # Function to generate AI video from images, narration, and music
 def generate_ai_video(image_url, audio_file, music_file, output_file="ai_movie_trailer.mp4"):
@@ -99,12 +115,9 @@ def generate_ai_video(image_url, audio_file, music_file, output_file="ai_movie_t
 
     return output_file
 
-
-
-
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
-st.subheader("Generate AI-powered movie scripts with visuals & voice narration!")
+st.subheader("Generate AI-powered movie scripts with visuals, narration & music!")
 
 # User input for movie idea
 user_prompt = st.text_input("Enter your movie idea:", "A cyberpunk heist thriller")
@@ -129,8 +142,24 @@ if st.session_state.movie_script:
 if st.session_state.movie_image_url:
     st.image(st.session_state.movie_image_url, caption="AI-Generated Movie Scene", use_container_width=True)
 
+# Generate and play AI background music
+if st.button("Generate Background Music"):
+    st.session_state.music_file = generate_background_music(user_prompt)
+
 # Play AI voice narration
 if st.session_state.audio_file:
     st.audio(st.session_state.audio_file, format="audio/mp3")
 
-st.markdown("🚀 *Powered by OpenAI GPT-4, DALL·E 3 & ElevenLabs AI*")
+# Play AI background music
+if "music_file" in st.session_state:
+    st.audio(st.session_state.music_file, format="audio/mp3")
+
+# Generate and play AI movie trailer
+if st.button("Generate AI Movie Trailer"):
+    if st.session_state.movie_image_url and st.session_state.audio_file and "music_file" in st.session_state:
+        st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url, st.session_state.audio_file, st.session_state.music_file)
+        st.video(st.session_state.video_file)
+    else:
+        st.warning("Generate script, image, narration, and music first!")
+
+st.markdown("🚀 *Powered by OpenAI GPT-4, DALL·E 3, ElevenLabs, and Riffusion*")
