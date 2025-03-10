@@ -126,15 +126,6 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         print("❌ Error: Audio file not found or is empty!")
         return None  # Stop execution if no valid audio file
 
-    # Trim the audio file to 10 seconds (matching video length)
-    trimmed_audio = "trimmed_audio.mp3"
-    try:
-        ffmpeg.input(audio_file).output(trimmed_audio, t=10).run(overwrite_output=True)
-        print("✅ Trimmed audio successfully to 10 seconds.")
-    except ffmpeg.Error as e:
-        print("❌ Error trimming audio:", e.stderr.decode("utf-8"))
-        return None
-
     # Debug: Check if temp_video.mp4 exists before merging
     if not os.path.exists("temp_video.mp4"):
         print("❌ Error: Video file not found before merging!")
@@ -145,7 +136,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         print("🔄 Merging video and audio with FFmpeg...")
 
         input_video = ffmpeg.input("temp_video.mp4")  # Video input
-        input_audio = ffmpeg.input(trimmed_audio)  # Trimmed audio input
+        input_audio = ffmpeg.input(audio_file)  # Audio input
 
         process = (
             ffmpeg
@@ -155,7 +146,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
                 output_file,
                 vcodec="libx264",
                 acodec="aac",
-                strict="experimental",
+                format="mp4",
                 shortest=True,  # Ensures video and audio end together
                 audio_bitrate="192k"
             )
@@ -177,6 +168,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
