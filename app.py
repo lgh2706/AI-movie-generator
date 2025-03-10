@@ -187,6 +187,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
 
 
 
+
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
 st.subheader("Generate AI-powered movie scripts with visuals, narration & music!")
