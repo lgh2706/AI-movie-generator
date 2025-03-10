@@ -125,7 +125,15 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
             .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
-        return output_file
+
+        # Debugging: Check if the output file exists
+        if os.path.exists(output_file):
+            print(f"Video successfully generated: {output_file}")
+            return output_file
+        else:
+            print("Error: Video file was not generated!")
+            return None
+
     except ffmpeg.Error as e:
         print("FFmpeg error occurred")
         if e.stderr:
@@ -133,6 +141,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
