@@ -7,7 +7,6 @@ from reportlab.lib.utils import ImageReader
 import io
 import requests
 import elevenlabs
-import suno
 import cv2
 import ffmpeg
 import numpy as np
@@ -71,20 +70,20 @@ def generate_voice_narration(text):
 
 
 
-# Function to generate AI background music using Suno AI
+import torchaudio
+from diffusers import AudioLDMPipeline
+
+# Function to generate AI background music using Stable Diffusion Audio
 def generate_background_music(movie_prompt):
-    music = suno.generate_music(
-        prompt=movie_prompt,
-        style="cinematic",
-        duration=30  # Generate 30 seconds of background music
-    )
+    pipe = AudioLDMPipeline.from_pretrained("cvssp/audioldm-musicgen")
+    audio = pipe(prompt=movie_prompt, num_inference_steps=10).audios
 
     # Save the generated music file
-    music_file = "ai_background_music.mp3"
-    with open(music_file, "wb") as f:
-        f.write(music)
+    music_file = "ai_background_music.wav"
+    torchaudio.save(music_file, audio, sample_rate=16000)
 
     return music_file
+
 
 # Function to generate AI video from images, narration, and music
 def generate_ai_video(image_url, audio_file, music_file, output_file="ai_movie_trailer.mp4"):
