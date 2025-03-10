@@ -77,17 +77,24 @@ import os
 
 # Function to generate AI video from images and narration
 def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4"):
+    print("Starting AI video generation...")
+
     # Download AI-generated image
     image_response = requests.get(image_url, stream=True)
     if image_response.status_code == 200:
         with open("ai_scene.jpg", "wb") as f:
             f.write(image_response.content)
+        print("✅ AI-generated image saved successfully!")
     else:
-        print("Error: Failed to download image.")
+        print("❌ Error: Failed to download image.")
         return None
 
     # Load image and resize for video
     img = cv2.imread("ai_scene.jpg")
+    if img is None:
+        print("❌ Error: Failed to load AI-generated image.")
+        return None
+
     height, width, _ = img.shape
     video_fps = 30
     duration = 10  # 10 seconds
@@ -103,19 +110,21 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
 
     # Release the video writer
     video_writer.release()
+    print("✅ temp_video.mp4 generated successfully!")
 
     # Ensure audio file exists before merging
     if not os.path.exists(audio_file):
-        print("Error: Audio file not found!")
+        print("❌ Error: Audio file not found!")
         return None  # Stop execution if no audio file
 
     # Debug: Check if temp_video.mp4 exists
     if not os.path.exists("temp_video.mp4"):
-        print("Error: Video file not found!")
+        print("❌ Error: Video file not found!")
         return None  # Stop execution if no video file
 
     # Merge video and voice narration using FFmpeg
     try:
+        print("🔄 Merging video and audio with FFmpeg...")
         input_video = ffmpeg.input("temp_video.mp4")  # Video input
         input_audio = ffmpeg.input(audio_file)  # Audio input
 
@@ -123,24 +132,25 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
             ffmpeg
             .concat(input_video, input_audio, v=1, a=1)  # Merge video and audio
             .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
-            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+            .run(overwrite_output=True)
         )
 
         # Debugging: Check if the output file exists
         if os.path.exists(output_file):
-            print(f"Video successfully generated: {output_file}")
+            print(f"✅ Video successfully generated: {output_file}")
             return output_file
         else:
-            print("Error: Video file was not generated!")
+            print("❌ Error: Video file was not generated!")
             return None
 
     except ffmpeg.Error as e:
-        print("FFmpeg error occurred")
+        print("❌ FFmpeg error occurred")
         if e.stderr:
             print("FFmpeg error details:", e.stderr.decode("utf-8"))
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
