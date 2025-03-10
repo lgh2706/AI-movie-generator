@@ -56,7 +56,7 @@ def generate_movie_image(prompt):
 def generate_voice_narration(text):
     audio = elevenlabs.generate(
         text=text,
-        voice="Miruna",  # Replace with a valid voice from ElevenLabs
+        voice="Roger",  # Replace with a valid voice from ElevenLabs
         model="eleven_multilingual_v2",
         api_key=ELEVENLABS_API_KEY
     )
