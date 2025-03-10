@@ -84,6 +84,8 @@ def generate_ai_video(image_url, audio_file, output_file=None):
     if output_file is None or not isinstance(output_file, str) or output_file.lower() == "true":
         output_file = "final_ai_movie_trailer.mp4"  # Set a valid default filename
 
+    print(f"📌 Using output filename: {output_file}")  # Debugging: Confirm filename
+
     # Download AI-generated image
     image_response = requests.get(image_url, stream=True)
     if image_response.status_code == 200:
@@ -147,7 +149,7 @@ def generate_ai_video(image_url, audio_file, output_file=None):
             .output(
                 input_video,
                 input_audio,
-                output_file,
+                filename=output_file,  # Explicitly setting output file
                 vcodec="libx264",
                 acodec="aac",
                 format="mp4",
