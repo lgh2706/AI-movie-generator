@@ -75,13 +75,16 @@ import cv2
 import requests
 import os
 
-# Function to generate AI video from images, narration, and music
+# Function to generate AI video from images and narration
 def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4"):
     # Download AI-generated image
     image_response = requests.get(image_url, stream=True)
     if image_response.status_code == 200:
         with open("ai_scene.jpg", "wb") as f:
             f.write(image_response.content)
+    else:
+        print("Error: Failed to download image.")
+        return None
 
     # Load image and resize for video
     img = cv2.imread("ai_scene.jpg")
@@ -102,17 +105,29 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
     video_writer.release()
 
     # Ensure audio file exists before merging
-    if os.path.exists(audio_file):
+    if not os.path.exists(audio_file):
+        print("Error: Audio file not found!")
+        return None  # Stop execution if no audio file
+
+    # Debug: Check if temp_video.mp4 exists
+    if not os.path.exists("temp_video.mp4"):
+        print("Error: Video file not found!")
+        return None  # Stop execution if no video file
+
+    # Merge video and voice narration using FFmpeg
+    try:
         (
             ffmpeg
-            .input("temp_video.mp4")
-            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=None, audio_bitrate="192k", input=ffmpeg.input(audio_file))
+            .input("temp_video.mp4")  # AI-generated image video
+            .input(audio_file)  # AI voice narration
+            .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
             .run(overwrite_output=True)
         )
-    else:
-        print("Error: Audio file not found!")
+        return output_file
+    except ffmpeg.Error as e:
+        print("FFmpeg error:", e.stderr.decode())
+        return None  # Stop execution if FFmpeg fails
 
-    return output_file
 
 
 
