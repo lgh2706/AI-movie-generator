@@ -2,6 +2,5 @@ openai>=1.2.0
 streamlit
 python-dotenv
 requests
-reportlab
 elevenlabs
 pydub
