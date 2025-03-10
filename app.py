@@ -8,14 +8,13 @@ import io
 import requests
 import elevenlabs
 from pydub import AudioSegment
-from pydub.playback import play
 
-# Load API key from environment variable
-API_KEY = os.getenv("OPENAI_API_KEY")
+# Load API keys from environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 # Set OpenAI API key
-openai.api_key = API_KEY
+openai.api_key = OPENAI_API_KEY
 
 # Initialize session state to store script, image, and audio
 if "movie_script" not in st.session_state:
@@ -25,7 +24,7 @@ if "movie_image_url" not in st.session_state:
 if "audio_file" not in st.session_state:
     st.session_state.audio_file = ""
 
-# Function to generate movie script
+# Function to generate movie script using OpenAI GPT-4
 def generate_movie_script(user_prompt):
     response = openai.chat.completions.create(
         model="gpt-4",
@@ -36,7 +35,7 @@ def generate_movie_script(user_prompt):
     )
     return response.choices[0].message.content
 
-# Function to generate AI image (scene or character)
+# Function to generate AI image (scene or character) using DALL·E
 def generate_movie_image(prompt):
     response = openai.images.generate(
         model="dall-e-3",
@@ -46,27 +45,20 @@ def generate_movie_image(prompt):
     )
     return response.data[0].url
 
-# Function to generate AI voice narration
-from elevenlabs.client import ElevenLabs
-
-# Initialize ElevenLabs API client
-elevenlabs_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
-
-# Function to generate AI voice narration
+# Function to generate AI voice narration using ElevenLabs
 def generate_voice_narration(text):
-    audio = elevenlabs_client.text_to_speech(
+    audio = elevenlabs.generate(
         text=text,
-        voice_id="Rachel"
+        voice="Rachel",
+        api_key=ELEVENLABS_API_KEY
     )
-    
+
     # Save the generated voice file
     audio_file = "ai_voice_narration.mp3"
     with open(audio_file, "wb") as f:
         f.write(audio)
-    
+
     return audio_file
-
-
 
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
