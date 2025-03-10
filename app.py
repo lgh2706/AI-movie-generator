@@ -70,30 +70,6 @@ def generate_voice_narration(text):
 
 
 
-import torchaudio
-from diffusers import AudioLDMPipeline
-
-# Function to generate AI background music using Stable Diffusion Audio
-def generate_background_music(movie_prompt):
-    try:
-        pipe = AudioLDMPipeline.from_pretrained("cvssp/audioldm-musicgen")
-        audio = pipe(prompt=movie_prompt, num_inference_steps=10).audios
-
-        # Ensure audio is not empty
-        if audio is None or len(audio) == 0:
-            return None  # Return None if generation failed
-
-        # Save the generated music file
-        music_file = "ai_background_music.wav"
-        torchaudio.save(music_file, audio, sample_rate=16000)
-
-        return music_file
-    except Exception as e:
-        print(f"Error generating music: {e}")
-        return None  # Return None in case of failure
-
-
-
 # Function to generate AI video from images, narration, and music
 def generate_ai_video(image_url, audio_file, music_file, output_file="ai_movie_trailer.mp4"):
     # Download AI-generated image
@@ -152,18 +128,14 @@ if st.session_state.movie_script:
 if st.session_state.movie_image_url:
     st.image(st.session_state.movie_image_url, caption="AI-Generated Movie Scene", use_container_width=True)
 
-# Generate and play AI background music
-if st.button("Generate Background Music"):
-    st.session_state.music_file = generate_background_music(user_prompt)
+
+
 
 # Play AI voice narration
 if st.session_state.audio_file:
     st.audio(st.session_state.audio_file, format="audio/mp3")
 
-if "music_file" in st.session_state and st.session_state.music_file:
-    st.audio(st.session_state.music_file, format="audio/wav")
-else:
-    st.warning("No background music generated yet. Click 'Generate Background Music' first.")
+
 
 
 # Generate and play AI movie trailer
