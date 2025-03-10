@@ -64,6 +64,40 @@ def generate_voice_narration(text):
         f.write(audio)
 
     return audio_file
+import cv2
+import ffmpeg
+import numpy as np
+
+# Function to generate AI video from images, narration, and music
+def generate_ai_video(image_url, audio_file, music_file, output_file="ai_movie_trailer.mp4"):
+    # Download AI-generated image
+    image_response = requests.get(image_url, stream=True)
+    if image_response.status_code == 200:
+        with open("ai_scene.jpg", "wb") as f:
+            f.write(image_response.content)
+
+    # Load image and resize for video
+    img = cv2.imread("ai_scene.jpg")
+    height, width, _ = img.shape
+    video_fps = 30
+    duration = 10  # 10 seconds
+    frame_count = video_fps * duration
+
+    # Create a video writer
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video_writer = cv2.VideoWriter(output_file, fourcc, video_fps, (width, height))
+
+    # Add frames with AI-generated image
+    for _ in range(frame_count):
+        video_writer.write(img)
+
+    # Release the video writer
+    video_writer.release()
+
+    # Merge voice and music into video
+    ffmpeg.input(output_file).output(audio_file, music_file, vcodec="libx264").run()
+
+    return output_file
 
 
 
