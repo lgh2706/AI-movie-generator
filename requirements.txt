@@ -5,6 +5,7 @@ requests
 elevenlabs==0.2.26
 pydub
 reportlab==3.6.12
-suno-ai
+torchaudio
+diffusers
 opencv-python
 ffmpeg-python
