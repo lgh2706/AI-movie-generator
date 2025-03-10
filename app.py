@@ -57,6 +57,5 @@ if st.session_state.movie_script:
 
 # Display the stored image
 if st.session_state.movie_image_url:
-    st.image(st.session_state.movie_image_url, caption="AI-Generated Movie Scene", use_column_width=True)
-
+    st.image(st.session_state.movie_image_url, caption="AI-Generated Movie Scene", use_container_width=True)
 st.markdown("🚀 *Powered by OpenAI GPT-4 & DALL·E 3*")
