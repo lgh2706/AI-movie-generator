@@ -119,16 +119,21 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         input_video = ffmpeg.input("temp_video.mp4")  # Video input
         input_audio = ffmpeg.input(audio_file)  # Audio input
 
-        (
+        process = (
             ffmpeg
             .concat(input_video, input_audio, v=1, a=1)  # Merge video and audio
             .output(output_file, vcodec="libx264", acodec="aac", strict="experimental", shortest=True)
-            .run(overwrite_output=True)
+            .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
         return output_file
     except ffmpeg.Error as e:
-        print("FFmpeg error:", e.stderr.decode())
+        print("FFmpeg error occurred")
+        if e.stderr:
+            print("FFmpeg error details:", e.stderr.decode("utf-8"))
+        else:
+            print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
