@@ -77,10 +77,12 @@ import os
 import time
 
 # Function to generate AI video from images and narration
-def generate_ai_video(image_url, audio_file, output_file):
+def generate_ai_video(image_url, audio_file, output_file=None):
     print("🎬 Starting AI video generation...")
 
-  
+    # Ensure output_file is a valid string
+    if output_file is None or isinstance(output_file, bool) or output_file.lower() == "true":
+        output_file = "final_ai_movie_trailer.mp4"  # Set a proper default filename
 
     print(f"📌 Using output filename: {output_file}")  # Debugging: Confirm filename
 
@@ -172,6 +174,7 @@ def generate_ai_video(image_url, audio_file, output_file):
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
