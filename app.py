@@ -77,11 +77,11 @@ import os
 import time
 
 # Function to generate AI video from images and narration
-def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4"):
+def generate_ai_video(image_url, audio_file, output_file=None):
     print("🎬 Starting AI video generation...")
 
     # Ensure output_file is a valid string
-    if not isinstance(output_file, str) or output_file.lower() in ["true", "false"]:
+    if output_file is None or not isinstance(output_file, str) or output_file.lower() == "true":
         output_file = "final_ai_movie_trailer.mp4"  # Set a valid default filename
 
     # Download AI-generated image
@@ -135,10 +135,10 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         print("❌ Error: Video file not found before merging!")
         return None  # Stop execution if no video file
 
+    print(f"🔄 Merging video and audio with FFmpeg... Output file: {output_file}")
+
     # Merge video and voice narration using FFmpeg
     try:
-        print(f"🔄 Merging video and audio with FFmpeg... Output file: {output_file}")
-
         input_video = ffmpeg.input("temp_video.mp4")  # Video input
         input_audio = ffmpeg.input(audio_file)  # Audio input
 
@@ -172,6 +172,7 @@ def generate_ai_video(image_url, audio_file, output_file="ai_movie_trailer.mp4")
         else:
             print("No FFmpeg stderr output available")
         return None  # Stop execution if FFmpeg fails
+
 
 
 
