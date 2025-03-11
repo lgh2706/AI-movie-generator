@@ -209,7 +209,7 @@ if st.button("Generate AI Movie Trailer"):
                 video_bytes = video_file.read()
                 st.video(video_bytes)
 
-            # ✅ Provide a download link for the video
+            # ✅ Provide a download button for the video
             st.download_button("Download AI Movie Trailer", video_bytes, file_name="ai_movie_trailer.mp4", mime="video/mp4")
 
         else:
