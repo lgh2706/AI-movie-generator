@@ -70,7 +70,10 @@ def generate_voice_narration(text):
 
 
 
-
+import cv2
+import requests
+import os
+import time
 
 # Function to generate AI video from an image (NO AUDIO)
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
@@ -150,6 +153,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
 
 
 
+
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
 st.subheader("Generate AI-powered movie scripts with visuals, narration & music!")
@@ -189,10 +193,11 @@ if st.session_state.audio_file:
 
 # Generate and play AI movie trailer
 if st.button("Generate AI Movie Trailer"):
-    if st.session_state.movie_image_url and st.session_state.audio_file and "music_file" in st.session_state:
+    if st.session_state.movie_image_url:
         st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url)
         st.video(st.session_state.video_file)
     else:
-        st.warning("Generate script, image, narration, and music first!")
+        st.warning("Generate an image first!")
+
 
 st.markdown("🚀 *Powered by OpenAI GPT-4, DALL·E 3, ElevenLabs, and Riffusion*")
