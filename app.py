@@ -162,7 +162,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
 
 
 # Streamlit UI
-st.title("🎬 AI Movie Generator")
+st.title("🎬 Neural Flicks")
 st.subheader("Generate AI-powered movie scripts with visuals, narration & Movie trailer!")
 
 # User input for movie idea
@@ -235,4 +235,4 @@ if st.button("Generate AI Movie Trailer"):
 
 
 
-st.markdown("🚀 *Powered by OpenAI GPT-4, DALL·E 3, ElevenLabs, and Runway AI*")
+st.markdown("🚀 *Demo version - Powered by OpenAI GPT-4, DALL·E 3, ElevenLabs, and Runway AI*")
