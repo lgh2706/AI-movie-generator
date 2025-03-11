@@ -86,18 +86,25 @@ if not os.path.exists(GENERATED_DIR):
 RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 
 # ✅ Function to generate AI video using Runway Gen-2
-def generate_ai_video(text_prompt, output_file="ai_movie_trailer.mp4"):
+def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation with Runway Gen-2...")
 
-    # ✅ Set up API request
-    runway_url = "https://api.runwayml.com/v1/text-to-video"  # Runway API Endpoint
+    # ✅ Set up API request for image-to-video
+    runway_url = "https://api.runwayml.com/v1/image_to_video"
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
         "Content-Type": "application/json"
     }
     data = {
-        "prompt": text_prompt,  # Text input for AI-generated video
-        "motion": "smooth",  # Can be "cinematic", "dynamic", etc.
+        "prompt": "A cinematic AI-generated sci-fi movie scene",  # AI-generated video description
+        "promptImage": [
+            {
+                "uri": image_url,  # Image URL for AI video generation
+                "position": "first"
+            }
+        ],
+        "ratio": "1280:768",  # Resolution for the output video
+        "motion": "cinematic",  # Motion type
         "duration": 10,  # 10 seconds
         "fps": 24  # Frames per second
     }
