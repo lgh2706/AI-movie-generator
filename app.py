@@ -206,7 +206,7 @@ if st.button("Generate AI Voice Narration"):
         time.sleep(10)  # Wait for 10 seconds
         audio_path = os.path.join(GENERATED_DIR, "ai_voice_narration.mp3")
     else:
-    script_path = os.path.join(GENERATED_DIR, "movie_script.txt")
+        script_path = os.path.join(GENERATED_DIR, "movie_script.txt")
     if os.path.exists(script_path):
         with open(script_path, "r", encoding="utf-8") as file:
             script_text = file.read()
