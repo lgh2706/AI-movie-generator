@@ -178,11 +178,26 @@ if st.session_state.audio_file:
 
 # Generate and play AI movie trailer
 if st.button("Generate AI Movie Trailer"):
+    print("🎬 'Generate AI Movie Trailer' button clicked!")  # Debugging log
+
     if st.session_state.movie_image_url:
+        print("✅ Image exists! Calling generate_ai_video()...")
+        
+        # Call video generation function
         st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url)
-        st.video(st.session_state.video_file)
+
+        # Check if video was actually generated
+        if st.session_state.video_file and os.path.exists(st.session_state.video_file):
+            print(f"✅ Video successfully generated: {st.session_state.video_file}")
+            st.video(st.session_state.video_file)
+        else:
+            print("❌ Video generation failed!")
+            st.warning("Failed to generate video. Please try again.")
+
     else:
+        print("❌ No image found! Can't generate video.")
         st.warning("Generate an image first!")
+
 
 
 st.markdown("🚀 *Powered by OpenAI GPT-4, DALL·E 3, ElevenLabs, and Riffusion*")
