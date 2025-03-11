@@ -176,14 +176,17 @@ user_prompt = st.text_input("Enter your movie idea:", "A cyberpunk heist thrille
 if st.button("Generate Movie Script & Image"):
     if user_prompt:
         # ✅ Generate and store the movie script
-        st.session_state.movie_script = generate_movie_script(user_prompt)
+        script_text = generate_movie_script(user_prompt)
+        if script_text:
+            st.session_state.movie_script = script_text
+            script_filename = os.path.join(GENERATED_DIR, "movie_script.txt")
+            with open(script_filename, "w", encoding="utf-8") as script_file:
+                script_file.write(script_text)
+            print(f"✅ Movie script saved: {script_filename}")
+        else:
+            print("❌ Error: Movie script generation failed.")
 
-        # ✅ Save the script as a .txt file
-        script_filename = os.path.join(GENERATED_DIR, "movie_script.txt")
-        with open(script_filename, "w", encoding="utf-8") as script_file:
-            script_file.write(st.session_state.movie_script)
-        print(f"✅ Movie script saved: {script_filename}")
-
+     
         # ✅ Generate and store the AI-generated scene image
         image_prompt = f"An epic scene from the movie: {user_prompt}"
         image_url = generate_movie_image(image_prompt)
