@@ -110,6 +110,17 @@ if st.button("Generate Movie Script & Image"):
         script_path = os.path.join(GENERATED_DIR, "movie_script.txt")
         image_path = os.path.join(GENERATED_DIR, "movie_scene.png")
     else:
+        if user_prompt:
+            script_path = generate_movie_script(user_prompt)
+            image_path = generate_movie_image(f"An epic scene from the movie: {user_prompt}")
+        else:
+            st.warning("Please enter a movie idea!")
+    if user_prompt == "A cyberpunk heist thriller":
+        st.warning("Using pre-generated files for demo...")
+        time.sleep(10)  # Wait for 10 seconds
+        script_path = os.path.join(GENERATED_DIR, "movie_script.txt")
+        image_path = os.path.join(GENERATED_DIR, "movie_scene.png")
+    else:
         script_path = generate_movie_script(user_prompt)
         image_path = generate_movie_image(f"An epic scene from the movie: {user_prompt}")
     if user_prompt == "A cyberpunk heist thriller":
@@ -130,6 +141,19 @@ if st.button("Generate Movie Script & Image"):
         st.image(image_path, caption="AI-Generated Movie Scene", use_container_width=True)
 
 if st.button("Generate AI Voice Narration"):
+    if user_prompt == "A cyberpunk heist thriller":
+        st.warning("Using pre-generated voice narration for demo...")
+        time.sleep(10)  # Wait for 10 seconds
+        audio_path = os.path.join(GENERATED_DIR, "ai_voice_narration.mp3")
+    else:
+        script_path = os.path.join(GENERATED_DIR, "movie_script.txt")
+        if os.path.exists(script_path):
+            with open(script_path, "r", encoding="utf-8") as file:
+                script_text = file.read()
+            audio_path = generate_voice_narration(script_text)
+            st.audio(audio_path, format="audio/mp3")
+        else:
+            st.warning("No script found! Generate a script first.")
     if user_prompt == "A cyberpunk heist thriller":
         st.warning("Using pre-generated voice narration for demo...")
         time.sleep(10)  # Wait for 10 seconds
