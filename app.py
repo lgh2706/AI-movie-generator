@@ -89,7 +89,7 @@ RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation with Runway Gen-2...")
 
-    # ✅ Ensure the image URL is HTTPS and valid
+    # ✅ Ensure the image URL is HTTPS
     if not image_url.startswith("https://"):
         print(f"❌ Error: Invalid image URL → {image_url}")
         return None
@@ -160,6 +160,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
 
 
 
+
 # Streamlit UI
 st.title("🎬 AI Movie Generator")
 st.subheader("Generate AI-powered movie scripts with visuals, narration & music!")
@@ -201,11 +202,11 @@ if st.session_state.audio_file:
 if st.button("Generate AI Movie Trailer"):
     print("🎬 'Generate AI Movie Trailer' button clicked!")
 
-    if st.session_state.movie_script:
-        print("✅ Movie script exists! Sending to Runway Gen-2 for video generation...")
+    if st.session_state.movie_image_url:
+        print("✅ Movie image exists! Sending to Runway Gen-2 for video generation...")
 
         # ✅ Generate the video using Runway API
-        video_path = generate_ai_video(st.session_state.movie_script)
+        video_path = generate_ai_video(st.session_state.movie_image_url)
 
         # ✅ Debug: Check if the video file exists
         if video_path and os.path.exists(video_path):
