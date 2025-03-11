@@ -89,26 +89,29 @@ RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation with Runway Gen-2...")
 
-    # ✅ Set up API request for image-to-video
-    runway_url = "https://api.runwayml.com/v1/image_to_video"
+    # ✅ Correct API endpoint for image-to-video generation
+    runway_url = "https://api.runwayml.com/v1/video/generate"
+    
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
+        "Runway-Version": "2024-11-06",  # ✅ Set API Version
         "Content-Type": "application/json"
     }
+    
     data = {
         "prompt": "A cinematic AI-generated sci-fi movie scene",  # AI-generated video description
         "promptImage": [
             {
-                "uri": image_url,  # Image URL for AI video generation
+                "uri": image_url,  # AI-generated image URL for the video
                 "position": "first"
             }
         ],
-        "ratio": "1280:768",  # Resolution for the output video
+        "ratio": "1280:768",  # Correct resolution format
         "motion": "cinematic",  # Motion type
         "duration": 10,  # 10 seconds
         "fps": 24  # Frames per second
     }
-    
+
     print("🚀 Sending request to Runway API...")
     response = requests.post(runway_url, headers=headers, json=data)
 
@@ -136,6 +139,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
         print(f"❌ Runway API request failed. Response Code: {response.status_code}")
         print(f"🔴 API Response: {response.text}")
         return None
+
 
 
 
