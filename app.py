@@ -188,6 +188,23 @@ if st.button("Generate AI Voice Narration"):
         st.audio(audio_path, format="audio/mp3")
 
 if st.button("Generate AI Movie Trailer"):
+    if user_prompt == "A cyberpunk heist thriller":
+        st.warning("Using pre-generated AI movie trailer for demo...")
+        time.sleep(10)  # Wait for 10 seconds
+        video_path = os.path.join(GENERATED_DIR, "ai_movie_trailer.mp4")
+    else:
+        image_path = os.path.join(GENERATED_DIR, "movie_scene.png")
+        if os.path.exists(image_path):
+            video_path = generate_ai_video()
+            if video_path:
+                with open(video_path, "rb") as video_file:
+                    video_bytes = video_file.read()
+                    st.video(video_bytes)
+                    st.download_button("📥 Download AI Movie Trailer", video_bytes, file_name="ai_movie_trailer.mp4", mime="video/mp4")
+            else:
+                st.warning("Failed to generate AI video. Please try again.")
+        else:
+            st.warning("No movie image found! Generate an image first.")
     video_path = generate_ai_video()
     if video_path:
         with open(video_path, "rb") as video_file:
