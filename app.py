@@ -70,17 +70,17 @@ def generate_voice_narration(text):
 
 
 
-import os
 import cv2
 import requests
+import os
 import time
 
 # Function to generate AI video from an image (NO AUDIO)
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation (Video only)...")
 
-    # Ensure output_file is saved in a known directory
-    output_path = os.path.join(os.getcwd(), output_file)  # Use absolute path
+    # Save the video in the `/tmp/` directory so Streamlit can access it
+    output_path = os.path.join("/tmp/", output_file)  
     print(f"📌 Using output filename: {output_path}")  # Debugging: Confirm filename
 
     # Download AI-generated image
@@ -128,7 +128,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     # Debug: Check if video was generated
     if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
         print(f"✅ Video successfully generated: {output_path} (Size: {os.path.getsize(output_path)} bytes)")
-        return output_path  # Return full file path
+        return output_path  # Return full path
     else:
         print("❌ Error: Video file was not generated!")
         return None
@@ -187,8 +187,13 @@ if st.button("Generate AI Movie Trailer"):
         # Ensure video was actually created
         if video_path and os.path.exists(video_path):
             print(f"✅ Video successfully generated: {video_path} (Size: {os.path.getsize(video_path)} bytes)")
-            st.session_state.video_file = video_path  # Store the correct full file path
-            st.video(video_path)  # Display the video
+            st.session_state.video_file = video_path  # Store the correct file path
+            
+            # Open the video file and display it
+            with open(video_path, "rb") as video_file:
+                video_bytes = video_file.read()
+                st.video(video_bytes)
+
         else:
             print("❌ Video generation failed or file not found!")
             st.warning("Failed to generate video. Please try again.")
@@ -196,6 +201,7 @@ if st.button("Generate AI Movie Trailer"):
     else:
         print("❌ No image found! Can't generate video.")
         st.warning("Generate an image first!")
+
 
 
 
