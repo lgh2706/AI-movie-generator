@@ -123,7 +123,7 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
     data_uri = f"data:image/png;base64,{encoded_image}"
 
     # ✅ Correct API endpoint for image-to-video generation
-    runway_url = "https://api.runwayml.com/v1/image-to-video"
+        runway_url = "https://api.runwayml.com/v1/image-to-video"
 
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
