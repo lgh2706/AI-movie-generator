@@ -89,12 +89,9 @@ RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation with Runway Gen-2...")
 
-    # ✅ Print the image URL for debugging
-    print(f"🔍 Image URL being sent to Runway API: {image_url}")
-
-    # ✅ Ensure the image URL is HTTPS
+    # ✅ Ensure the image URL is HTTPS and valid
     if not image_url.startswith("https://"):
-        print("❌ Error: Image URL must use HTTPS!")
+        print(f"❌ Error: Invalid image URL → {image_url}")
         return None
 
     # ✅ Check if the image is accessible
@@ -106,25 +103,25 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
 
     # ✅ Correct API endpoint for image-to-video generation
     runway_url = "https://api.runwayml.com/v1/video/generate"
-    
+
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
         "Runway-Version": "2024-11-06",  # ✅ Ensure correct API version
         "Content-Type": "application/json"
     }
-    
+
     data = {
-        "prompt": "A cinematic AI-generated sci-fi movie scene",
+        "prompt": "A cinematic AI-generated sci-fi movie scene",  # AI-generated video description
         "promptImage": [
             {
                 "uri": image_url,  # ✅ Ensure valid image URL is provided
                 "position": "first"
             }
         ],
-        "ratio": "1280:768",
-        "motion": "cinematic",
-        "duration": 10,
-        "fps": 24
+        "ratio": "1280:768",  # ✅ Ensure correct resolution format
+        "motion": "cinematic",  # ✅ Motion type
+        "duration": 10,  # ✅ 10 seconds
+        "fps": 24  # ✅ Frames per second
     }
 
     print("🚀 Sending request to Runway API...")
