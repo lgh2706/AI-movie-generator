@@ -190,6 +190,8 @@ if st.session_state.audio_file:
 
 
 # Generate and play AI movie trailer
+import base64
+
 if st.button("Generate AI Movie Trailer"):
     print("🎬 'Generate AI Movie Trailer' button clicked!")
 
@@ -204,13 +206,22 @@ if st.button("Generate AI Movie Trailer"):
             file_size = os.path.getsize(video_path)
             print(f"✅ Video file found: {video_path} (Size: {file_size} bytes)")
 
-            # ✅ Open and read the video as bytes before displaying it
+            # ✅ Serve the video using base64 encoding for Streamlit
             with open(video_path, "rb") as video_file:
                 video_bytes = video_file.read()
-                st.video(video_bytes)
+                video_base64 = base64.b64encode(video_bytes).decode()
 
-            # ✅ Provide a download button for the video
-            st.download_button("Download AI Movie Trailer", video_bytes, file_name="ai_movie_trailer.mp4", mime="video/mp4")
+                # ✅ Create an HTML5 video player with the correct format
+                video_html = f"""
+                    <video width="700" controls>
+                        <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                """
+                st.markdown(video_html, unsafe_allow_html=True)
+
+            # ✅ Provide a "Download" button
+            st.download_button("📥 Download AI Movie Trailer", video_bytes, file_name="ai_movie_trailer.mp4", mime="video/mp4")
 
         else:
             print("❌ Video generation failed or file not found!")
