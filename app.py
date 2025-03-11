@@ -131,6 +131,8 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
 
     print("🚀 Sending request to Runway API...")
     response = requests.post(runway_url, headers=headers, json=data)
+    print(f"❌ Runway API request failed. Response Code: {response.status_code}")
+    print(f"🔴 API Response: {response.text}")
 
     if response.status_code == 200:
         video_url = response.json().get("video_url")
