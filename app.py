@@ -222,11 +222,11 @@ if st.session_state.audio_file:
 if st.button("Generate AI Movie Trailer"):
     print("🎬 'Generate AI Movie Trailer' button clicked!")
 
-    if st.session_state.movie_image_url:
+    if st.session_state.movie_image_path and os.path.exists(st.session_state.movie_image_path):
         print("✅ Movie image exists! Sending to Runway Gen-2 for video generation...")
 
         # ✅ Generate the video using Runway API
-        video_path = generate_ai_video(st.session_state.movie_image_url)
+        video_path = generate_ai_video(st.session_state.movie_image_path)
 
         # ✅ Debug: Check if the video file exists
         if video_path and os.path.exists(video_path):
@@ -246,8 +246,9 @@ if st.button("Generate AI Movie Trailer"):
             st.warning("Failed to generate AI video. Please try again.")
 
     else:
-        print("❌ No movie script found! Can't generate video.")
-        st.warning("Generate a movie script first!")
+        print("❌ No movie image found! Can't generate video.")
+        st.warning("Generate an image first!")
+
 
 
 
