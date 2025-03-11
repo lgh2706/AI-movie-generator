@@ -24,12 +24,15 @@ if "movie_script" not in st.session_state:
     st.session_state.movie_script = ""
 if "movie_image_url" not in st.session_state:
     st.session_state.movie_image_url = ""
+if "movie_image_path" not in st.session_state:
+    st.session_state.movie_image_path = ""  # ✅ Initialize movie_image_path
 if "audio_file" not in st.session_state:
     st.session_state.audio_file = ""
 if "music_file" not in st.session_state:
     st.session_state.music_file = ""
 if "video_file" not in st.session_state:
     st.session_state.video_file = ""
+
 
 # Function to generate movie script using OpenAI GPT-4
 def generate_movie_script(user_prompt):
