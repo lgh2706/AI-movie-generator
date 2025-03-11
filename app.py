@@ -70,10 +70,7 @@ def generate_voice_narration(text):
 
 
 
-import cv2
-import requests
-import os
-import time
+
 
 # Function to generate AI video from an image (NO AUDIO)
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
