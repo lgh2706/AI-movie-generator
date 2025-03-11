@@ -126,7 +126,8 @@ def generate_ai_video(text_prompt, output_file="ai_movie_trailer.mp4"):
             print("❌ Error: Failed to download the AI-generated video.")
             return None
     else:
-        print(f"❌ Error: Runway API request failed. Response: {response.text}")
+        print(f"❌ Runway API request failed. Response Code: {response.status_code}")
+        print(f"🔴 API Response: {response.text}")
         return None
 
 
