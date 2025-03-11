@@ -137,7 +137,12 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
             return None
     else:
         print(f"❌ Runway API request failed. Response Code: {response.status_code}")
-        print(f"🔴 API Response: {response.text}")
+        try:
+            error_details = response.json()
+            print(f"🔴 API Response: {error_details}")
+        except Exception:
+            print("🔴 Failed to parse error details. Raw response:")
+            print(response.text)
         return None
 
 
