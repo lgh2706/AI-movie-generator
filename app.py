@@ -74,27 +74,40 @@ import cv2
 import requests
 import os
 import time
+from datetime import datetime
+
+# Define the base directory for generated files
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+GENERATED_DIR = os.path.join(BASE_DIR, "generated_files")
+
+# ✅ Ensure the directory exists
+if not os.path.exists(GENERATED_DIR):
+    os.makedirs(GENERATED_DIR)
 
 # Function to generate AI video from an image (NO AUDIO)
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation (Video only)...")
 
-    # Save the video in the `/tmp/` directory so Streamlit can access it
-    output_path = os.path.join("/tmp/", output_file)  
-    print(f"📌 Using output filename: {output_path}")  # Debugging: Confirm filename
+    # ✅ Set paths
+    image_filename = f"image_{int(time.time())}.jpg"  # Unique filename for images
+    image_path = os.path.join(GENERATED_DIR, image_filename)
+    video_path = os.path.join(GENERATED_DIR, output_file)  # Always overwrite this video
 
-    # Download AI-generated image
+    print(f"📌 Saving image as: {image_path}")
+    print(f"📌 Using output filename for video: {video_path}")
+
+    # ✅ Download AI-generated image
     image_response = requests.get(image_url, stream=True)
     if image_response.status_code == 200:
-        with open("ai_scene.jpg", "wb") as f:
+        with open(image_path, "wb") as f:
             f.write(image_response.content)
         print("✅ AI-generated image saved successfully!")
     else:
         print("❌ Error: Failed to download image.")
         return None
 
-    # Load image and resize for video
-    img = cv2.imread("ai_scene.jpg")
+    # ✅ Load image and resize for video
+    img = cv2.imread(image_path)
     if img is None:
         print("❌ Error: Failed to load AI-generated image.")
         return None
@@ -106,29 +119,29 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
 
     print(f"🟢 Generating {frame_count} frames for {duration} seconds at {video_fps} FPS")
 
-    # Create a video writer
+    # ✅ Create a video writer
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(output_path, fourcc, video_fps, (width, height))
+    video_writer = cv2.VideoWriter(video_path, fourcc, video_fps, (width, height))
 
-    # Check if video writer was properly initialized
+    # ✅ Check if video writer was properly initialized
     if not video_writer.isOpened():
         print("❌ Error: VideoWriter failed to initialize!")
         return None
 
-    # Add frames with AI-generated image
+    # ✅ Add frames with AI-generated image
     for i in range(frame_count):
         video_writer.write(img)
         if i % 50 == 0:
             print(f"📸 Writing frame {i}/{frame_count}")
 
-    # Release the video writer properly
+    # ✅ Release the video writer properly
     video_writer.release()
     time.sleep(2)  # Ensure the file is written before proceeding
 
-    # Debug: Check if video was generated
-    if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-        print(f"✅ Video successfully generated: {output_path} (Size: {os.path.getsize(output_path)} bytes)")
-        return output_path  # Return full path
+    # ✅ Debug: Check if video was generated
+    if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
+        print(f"✅ Video successfully generated: {video_path} (Size: {os.path.getsize(video_path)} bytes)")
+        return video_path  # Return full path to video
     else:
         print("❌ Error: Video file was not generated!")
         return None
@@ -183,26 +196,26 @@ if st.button("Generate AI Movie Trailer"):
     if st.session_state.movie_image_url:
         print("✅ Image exists! Calling generate_ai_video()...")
 
-        # Generate the video and get the full file path
+        # ✅ Generate the video and store the full file path
         video_path = generate_ai_video(st.session_state.movie_image_url)
 
-        # ✅ Debug: Check if the video file exists
+        # ✅ Ensure video was actually created
         if video_path and os.path.exists(video_path):
             file_size = os.path.getsize(video_path)
             print(f"✅ Video file found: {video_path} (Size: {file_size} bytes)")
 
-            # ✅ Display video in Streamlit
-            st.session_state.video_file = video_path  # Store the correct file path
-            st.video(video_path)
+            # ✅ Open and read the video as bytes
+            with open(video_path, "rb") as video_file:
+                video_bytes = video_file.read()
+                st.video(video_bytes)
 
         else:
-            print("❌ Video file NOT found!")
+            print("❌ Video generation failed or file not found!")
             st.warning("Failed to generate video. Please try again.")
 
     else:
         print("❌ No image found! Can't generate video.")
         st.warning("Generate an image first!")
-
 
 
 
