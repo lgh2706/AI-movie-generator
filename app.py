@@ -8,7 +8,6 @@ import io
 import requests
 import elevenlabs
 import cv2
-import ffmpeg
 import numpy as np
 from pydub import AudioSegment
 
