@@ -175,6 +175,8 @@ if st.session_state.audio_file:
 
 
 # Generate and play AI movie trailer
+import os
+
 if st.button("Generate AI Movie Trailer"):
     print("🎬 'Generate AI Movie Trailer' button clicked!")
 
@@ -184,18 +186,17 @@ if st.button("Generate AI Movie Trailer"):
         # Generate the video and get the full file path
         video_path = generate_ai_video(st.session_state.movie_image_url)
 
-        # Ensure video was actually created
+        # ✅ Debug: Check if the video file exists
         if video_path and os.path.exists(video_path):
-            print(f"✅ Video successfully generated: {video_path} (Size: {os.path.getsize(video_path)} bytes)")
-            st.session_state.video_file = video_path  # Store the correct file path
+            file_size = os.path.getsize(video_path)
+            print(f"✅ Video file found: {video_path} (Size: {file_size} bytes)")
 
-            # ✅ Read the video as bytes before displaying it
-            with open(video_path, "rb") as video_file:
-                video_bytes = video_file.read()
-                st.video(video_bytes)
+            # ✅ Display video in Streamlit
+            st.session_state.video_file = video_path  # Store the correct file path
+            st.video(video_path)
 
         else:
-            print("❌ Video generation failed or file not found!")
+            print("❌ Video file NOT found!")
             st.warning("Failed to generate video. Please try again.")
 
     else:
