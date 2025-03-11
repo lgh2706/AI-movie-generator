@@ -196,7 +196,7 @@ if st.button("Generate AI Movie Trailer"):
     if st.session_state.movie_image_url:
         print("✅ Image exists! Calling generate_ai_video()...")
 
-        # ✅ Generate the video and store the full file path
+        # ✅ Generate the video and get the full file path
         video_path = generate_ai_video(st.session_state.movie_image_url)
 
         # ✅ Debug: Check if the video file exists
@@ -204,9 +204,13 @@ if st.button("Generate AI Movie Trailer"):
             file_size = os.path.getsize(video_path)
             print(f"✅ Video file found: {video_path} (Size: {file_size} bytes)")
 
-            # ✅ Use direct file path instead of bytes
-            st.session_state.video_file = video_path
-            st.video(video_path)
+            # ✅ Open and read the video as bytes before displaying it
+            with open(video_path, "rb") as video_file:
+                video_bytes = video_file.read()
+                st.video(video_bytes)
+
+            # ✅ Provide a download link for the video
+            st.download_button("Download AI Movie Trailer", video_bytes, file_name="ai_movie_trailer.mp4", mime="video/mp4")
 
         else:
             print("❌ Video generation failed or file not found!")
