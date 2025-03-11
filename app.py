@@ -167,8 +167,8 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
 
 
 # Streamlit UI
-st.title("🎬 AI Movie Generator")
-st.subheader("Generate AI-powered movie scripts with visuals, narration & Movie trailer!")
+st.title("🎬 Neural Flicks")
+st.subheader("Generate AI-powered movie scripts & movie trailer!")
 
 # User input for movie idea
 user_prompt = st.text_input("Enter your movie idea:", "A cyberpunk heist thriller")
