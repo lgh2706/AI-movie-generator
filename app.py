@@ -88,6 +88,23 @@ RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 # ✅ Function to generate AI video using Runway Gen-2
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation with Runway Gen-2...")
+    
+    # ✅ Print the image URL for debugging
+    print(f"🔍 Image URL being sent to Runway API: {image_url}")
+
+    # ✅ Ensure the image URL is HTTPS
+    if not image_url.startswith("https://"):
+        print(f"❌ Error: Invalid image URL → {image_url}")
+        return None
+
+    # ✅ Check if the image URL is accessible
+    print(f"🔍 Verifying image URL: {image_url}")
+    image_check = requests.head(image_url)
+    if image_check.status_code != 200:
+        print(f"❌ Error: Image URL returned {image_check.status_code}, not 200 OK")
+        return None
+
+    return None  # Stop execution here for debugging
 
     # ✅ Ensure the image URL is HTTPS
     if not image_url.startswith("https://"):
