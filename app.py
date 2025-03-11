@@ -70,11 +70,9 @@ def generate_voice_narration(text):
 
 
 
-import cv2
 import requests
 import os
 import time
-import shutil  # ✅ Import shutil to move files
 
 # Define the base directory for generated files
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -84,68 +82,53 @@ GENERATED_DIR = os.path.join(BASE_DIR, "generated_files")
 if not os.path.exists(GENERATED_DIR):
     os.makedirs(GENERATED_DIR)
 
-# Function to generate AI video from an image (NO AUDIO)
-def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
-    print("🎬 Starting AI video generation (Video only)...")
+# ✅ Runway API Key (Loaded from Render environment variables)
+RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 
-    # ✅ Save in a temporary location first
-    temp_video_path = os.path.join("/tmp/", output_file)
-    final_video_path = os.path.join(GENERATED_DIR, output_file)  # ✅ This will be the final path
+# ✅ Function to generate AI video using Runway Gen-2
+def generate_ai_video(text_prompt, output_file="ai_movie_trailer.mp4"):
+    print("🎬 Starting AI video generation with Runway Gen-2...")
 
-    print(f"📌 Using temporary video path: {temp_video_path}")
-    print(f"📌 Final video will be stored at: {final_video_path}")
+    # ✅ Set up API request
+    runway_url = "https://api.runwayml.com/v1/text-to-video"  # Runway API Endpoint
+    headers = {
+        "Authorization": f"Bearer {RUNWAY_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "prompt": text_prompt,  # Text input for AI-generated video
+        "motion": "smooth",  # Can be "cinematic", "dynamic", etc.
+        "duration": 10,  # 10 seconds
+        "fps": 24  # Frames per second
+    }
+    
+    print("🚀 Sending request to Runway API...")
+    response = requests.post(runway_url, headers=headers, json=data)
 
-    # ✅ Download AI-generated image
-    image_response = requests.get(image_url, stream=True)
-    if image_response.status_code == 200:
-        image_path = os.path.join(GENERATED_DIR, "ai_scene.jpg")
-        with open(image_path, "wb") as f:
-            f.write(image_response.content)
-        print("✅ AI-generated image saved successfully!")
+    if response.status_code == 200:
+        video_url = response.json().get("video_url")
+        if not video_url:
+            print("❌ Error: No video URL returned from Runway.")
+            return None
+
+        print(f"✅ AI-generated video available at: {video_url}")
+
+        # ✅ Download the AI-generated video
+        output_path = os.path.join(GENERATED_DIR, output_file)
+        video_response = requests.get(video_url, stream=True)
+        if video_response.status_code == 200:
+            with open(output_path, "wb") as f:
+                for chunk in video_response.iter_content(chunk_size=1024):
+                    f.write(chunk)
+            print(f"✅ AI-generated video saved: {output_path}")
+            return output_path
+        else:
+            print("❌ Error: Failed to download the AI-generated video.")
+            return None
     else:
-        print("❌ Error: Failed to download image.")
+        print(f"❌ Error: Runway API request failed. Response: {response.text}")
         return None
 
-    # ✅ Load image and resize for video
-    img = cv2.imread(image_path)
-    if img is None:
-        print("❌ Error: Failed to load AI-generated image.")
-        return None
-
-    height, width, _ = img.shape
-    video_fps = 30
-    duration = 10  # Force duration to be 10 seconds
-    frame_count = video_fps * duration
-
-    print(f"🟢 Generating {frame_count} frames for {duration} seconds at {video_fps} FPS")
-
-    # ✅ Create a video writer
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(temp_video_path, fourcc, video_fps, (width, height))
-
-    # ✅ Check if video writer was properly initialized
-    if not video_writer.isOpened():
-        print("❌ Error: VideoWriter failed to initialize!")
-        return None
-
-    # ✅ Add frames with AI-generated image
-    for i in range(frame_count):
-        video_writer.write(img)
-        if i % 50 == 0:
-            print(f"📸 Writing frame {i}/{frame_count}")
-
-    # ✅ Release the video writer properly
-    video_writer.release()
-    time.sleep(2)  # Ensure the file is written before proceeding
-
-    # ✅ Move the video from `/tmp/` to `/generated_files/`
-    if os.path.exists(temp_video_path) and os.path.getsize(temp_video_path) > 0:
-        shutil.move(temp_video_path, final_video_path)
-        print(f"✅ Video successfully moved to: {final_video_path} (Size: {os.path.getsize(final_video_path)} bytes)")
-        return final_video_path  # ✅ Return new path
-    else:
-        print("❌ Error: Video file was not generated!")
-        return None
 
 
 
@@ -190,46 +173,35 @@ if st.session_state.audio_file:
 
 
 # Generate and play AI movie trailer
-import base64
-
 if st.button("Generate AI Movie Trailer"):
     print("🎬 'Generate AI Movie Trailer' button clicked!")
 
-    if st.session_state.movie_image_url:
-        print("✅ Image exists! Calling generate_ai_video()...")
+    if st.session_state.movie_script:
+        print("✅ Movie script exists! Sending to Runway Gen-2 for video generation...")
 
-        # ✅ Generate the video and get the full file path
-        video_path = generate_ai_video(st.session_state.movie_image_url)
+        # ✅ Generate the video using Runway API
+        video_path = generate_ai_video(st.session_state.movie_script)
 
         # ✅ Debug: Check if the video file exists
         if video_path and os.path.exists(video_path):
             file_size = os.path.getsize(video_path)
-            print(f"✅ Video file found: {video_path} (Size: {file_size} bytes)")
+            print(f"✅ AI-generated video found: {video_path} (Size: {file_size} bytes)")
 
-            # ✅ Serve the video using base64 encoding for Streamlit
+            # ✅ Play the video in Streamlit
             with open(video_path, "rb") as video_file:
                 video_bytes = video_file.read()
-                video_base64 = base64.b64encode(video_bytes).decode()
+                st.video(video_bytes)
 
-                # ✅ Create an HTML5 video player with the correct format
-                video_html = f"""
-                    <video width="700" controls>
-                        <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                """
-                st.markdown(video_html, unsafe_allow_html=True)
-
-            # ✅ Provide a "Download" button
+            # ✅ Provide a download button for the video
             st.download_button("📥 Download AI Movie Trailer", video_bytes, file_name="ai_movie_trailer.mp4", mime="video/mp4")
 
         else:
-            print("❌ Video generation failed or file not found!")
-            st.warning("Failed to generate video. Please try again.")
+            print("❌ AI video generation failed!")
+            st.warning("Failed to generate AI video. Please try again.")
 
     else:
-        print("❌ No image found! Can't generate video.")
-        st.warning("Generate an image first!")
+        print("❌ No movie script found! Can't generate video.")
+        st.warning("Generate a movie script first!")
 
 
 
