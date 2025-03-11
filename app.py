@@ -188,8 +188,8 @@ if st.button("Generate AI Movie Trailer"):
         if video_path and os.path.exists(video_path):
             print(f"✅ Video successfully generated: {video_path} (Size: {os.path.getsize(video_path)} bytes)")
             st.session_state.video_file = video_path  # Store the correct file path
-            
-            # Open the video file and display it
+
+            # ✅ Read the video as bytes before displaying it
             with open(video_path, "rb") as video_file:
                 video_bytes = video_file.read()
                 st.video(video_bytes)
@@ -201,6 +201,7 @@ if st.button("Generate AI Movie Trailer"):
     else:
         print("❌ No image found! Can't generate video.")
         st.warning("Generate an image first!")
+
 
 
 
