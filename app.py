@@ -70,20 +70,18 @@ def generate_voice_narration(text):
 
 
 
+import os
 import cv2
 import requests
-import os
 import time
 
 # Function to generate AI video from an image (NO AUDIO)
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation (Video only)...")
 
-    # Ensure output_file is a valid string
-    if output_file is None or isinstance(output_file, bool) or output_file.lower() == "true":
-        output_file = "final_ai_movie_trailer.mp4"  # Set a proper filename
-
-    print(f"📌 Using output filename: {output_file}")  # Debugging: Confirm filename
+    # Ensure output_file is saved in a known directory
+    output_path = os.path.join(os.getcwd(), output_file)  # Use absolute path
+    print(f"📌 Using output filename: {output_path}")  # Debugging: Confirm filename
 
     # Download AI-generated image
     image_response = requests.get(image_url, stream=True)
@@ -106,12 +104,11 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     duration = 10  # Force duration to be 10 seconds
     frame_count = video_fps * duration
 
-    # Debug: Check frame count
     print(f"🟢 Generating {frame_count} frames for {duration} seconds at {video_fps} FPS")
 
     # Create a video writer
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(output_file, fourcc, video_fps, (width, height))
+    video_writer = cv2.VideoWriter(output_path, fourcc, video_fps, (width, height))
 
     # Check if video writer was properly initialized
     if not video_writer.isOpened():
@@ -121,7 +118,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     # Add frames with AI-generated image
     for i in range(frame_count):
         video_writer.write(img)
-        if i % 50 == 0:  # Print progress every 50 frames
+        if i % 50 == 0:
             print(f"📸 Writing frame {i}/{frame_count}")
 
     # Release the video writer properly
@@ -129,12 +126,13 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     time.sleep(2)  # Ensure the file is written before proceeding
 
     # Debug: Check if video was generated
-    if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
-        print(f"✅ Video successfully generated: {output_file} (Size: {os.path.getsize(output_file)} bytes)")
-        return output_file
+    if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+        print(f"✅ Video successfully generated: {output_path} (Size: {os.path.getsize(output_path)} bytes)")
+        return output_path  # Return full file path
     else:
         print("❌ Error: Video file was not generated!")
         return None
+
 
 
 
@@ -178,18 +176,18 @@ if st.session_state.audio_file:
 
 # Generate and play AI movie trailer
 if st.button("Generate AI Movie Trailer"):
-    print("🎬 'Generate AI Movie Trailer' button clicked!")  # Debugging log
+    print("🎬 'Generate AI Movie Trailer' button clicked!")
 
     if st.session_state.movie_image_url:
         print("✅ Image exists! Calling generate_ai_video()...")
-        
+
         # Generate the video and get the full file path
         video_path = generate_ai_video(st.session_state.movie_image_url)
 
         # Ensure video was actually created
         if video_path and os.path.exists(video_path):
             print(f"✅ Video successfully generated: {video_path} (Size: {os.path.getsize(video_path)} bytes)")
-            st.session_state.video_file = video_path  # Store the correct file path
+            st.session_state.video_file = video_path  # Store the correct full file path
             st.video(video_path)  # Display the video
         else:
             print("❌ Video generation failed or file not found!")
