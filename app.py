@@ -54,7 +54,23 @@ def generate_movie_image(prompt):
         n=1,
         size="1024x1024"
     )
-    return response.data[0].url
+
+    image_url = response.data[0].url  # ✅ Get the generated image URL
+    print(f"✅ AI-generated image URL: {image_url}")
+
+    # ✅ Save the image in `generated_files/`
+    image_path = os.path.join(GENERATED_DIR, "movie_scene.png")
+    image_response = requests.get(image_url, stream=True)
+    if image_response.status_code == 200:
+        with open(image_path, "wb") as f:
+            f.write(image_response.content)
+        print(f"✅ AI-generated image saved: {image_path}")
+    else:
+        print("❌ Error: Failed to download AI-generated image.")
+        image_path = None  # Prevent using a missing image
+
+    return image_path
+
 
 # Function to generate AI voice narration using ElevenLabs
 def generate_voice_narration(text):
@@ -107,7 +123,7 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
     data_uri = f"data:image/png;base64,{encoded_image}"
 
     # ✅ Correct API endpoint for image-to-video generation
-   runway_url = "https://api.runwayml.com/v1/image-to-video"
+    runway_url = "https://api.runwayml.com/v1/image-to-video"
 
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
@@ -119,7 +135,7 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
         "prompt": "A cinematic AI-generated sci-fi movie scene",
         "promptImage": [
             {
-                "uri": data_uri,  # ✅ Use base64-encoded image
+                "uri": data_uri,  # ✅ Use the local image as base64
                 "position": "first"
             }
         ],
@@ -131,8 +147,6 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
 
     print("🚀 Sending request to Runway API...")
     response = requests.post(runway_url, headers=headers, json=data)
-    print(f"❌ Runway API request failed. Response Code: {response.status_code}")
-    print(f"🔴 API Response: {response.text}")
 
     if response.status_code == 200:
         video_url = response.json().get("video_url")
