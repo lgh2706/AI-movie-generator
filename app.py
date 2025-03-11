@@ -70,17 +70,16 @@ def generate_voice_narration(text):
 
 
 
-import ffmpeg
 import cv2
 import requests
 import os
 import time
 
-# Function to generate AI video from images and narration
-def generate_ai_video(image_url, audio_file, output_file=None):
-    print("🎬 Starting AI video generation...")
+# Function to generate AI video from an image (NO AUDIO)
+def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
+    print("🎬 Starting AI video generation (Video only)...")
 
-    # ✅ Force output_file to be a valid string
+    # Ensure output_file is a valid string
     if output_file is None or isinstance(output_file, bool) or output_file.lower() == "true":
         output_file = "final_ai_movie_trailer.mp4"  # Set a proper filename
 
@@ -112,7 +111,7 @@ def generate_ai_video(image_url, audio_file, output_file=None):
 
     # Create a video writer
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter("temp_video.mp4", fourcc, video_fps, (width, height))
+    video_writer = cv2.VideoWriter(output_file, fourcc, video_fps, (width, height))
 
     # Add frames with AI-generated image
     for _ in range(frame_count):
@@ -123,57 +122,13 @@ def generate_ai_video(image_url, audio_file, output_file=None):
     time.sleep(2)  # Ensure the file is written before proceeding
 
     # Debug: Check if video was generated
-    if not os.path.exists("temp_video.mp4") or os.path.getsize("temp_video.mp4") == 0:
-        print("❌ Error: temp_video.mp4 was not generated correctly!")
+    if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
+        print(f"✅ Video successfully generated: {output_file}")
+        return output_file
+    else:
+        print("❌ Error: Video file was not generated!")
         return None
 
-    # Ensure audio file exists before merging
-    if not os.path.exists(audio_file) or os.path.getsize(audio_file) == 0:
-        print("❌ Error: Audio file not found or is empty!")
-        return None  # Stop execution if no valid audio file
-
-    # Debug: Check if temp_video.mp4 exists before merging
-    if not os.path.exists("temp_video.mp4"):
-        print("❌ Error: Video file not found before merging!")
-        return None  # Stop execution if no video file
-
-    print(f"🔄 Merging video and audio with FFmpeg... Output file: {output_file}")
-
-    # ✅ Ensure we only pass **one output filename**
-    try:
-        input_video = ffmpeg.input("temp_video.mp4")  # Video input
-        input_audio = ffmpeg.input(audio_file)  # Audio input
-
-        process = (
-            ffmpeg
-            .output(
-                input_video,  # ✅ Video
-                input_audio,  # ✅ Audio
-                output_file,  # ✅ Ensure only **ONE** output file is passed
-                vcodec="libx264",
-                acodec="aac",
-                format="mp4",
-                shortest=True,  # Ensures video and audio end together
-                audio_bitrate="192k"
-            )
-            .run(overwrite_output=True)
-        )
-
-        # Debugging: Check if the output file exists
-        if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
-            print(f"✅ Video successfully generated: {output_file}")
-            return output_file
-        else:
-            print("❌ Error: Video file was not generated!")
-            return None
-
-    except ffmpeg.Error as e:
-        print("❌ FFmpeg error occurred")
-        if e.stderr:
-            print("FFmpeg error details:", e.stderr.decode("utf-8"))
-        else:
-            print("No FFmpeg stderr output available")
-        return None  # Stop execution if FFmpeg fails
 
 
 
@@ -238,7 +193,7 @@ if st.session_state.audio_file:
 # Generate and play AI movie trailer
 if st.button("Generate AI Movie Trailer"):
     if st.session_state.movie_image_url and st.session_state.audio_file and "music_file" in st.session_state:
-        st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url,st.session_state.audio_file,"final_ai_movie_trailer.mp4")
+        st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url)
         st.video(st.session_state.video_file)
     else:
         st.warning("Generate script, image, narration, and music first!")
