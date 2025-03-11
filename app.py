@@ -70,6 +70,11 @@ def generate_voice_narration(text):
 
 
 
+import cv2
+import requests
+import os
+import time
+
 # Function to generate AI video from an image (NO AUDIO)
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation (Video only)...")
@@ -108,9 +113,16 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video_writer = cv2.VideoWriter(output_file, fourcc, video_fps, (width, height))
 
+    # Check if video writer was properly initialized
+    if not video_writer.isOpened():
+        print("❌ Error: VideoWriter failed to initialize!")
+        return None
+
     # Add frames with AI-generated image
-    for _ in range(frame_count):
+    for i in range(frame_count):
         video_writer.write(img)
+        if i % 50 == 0:  # Print progress every 50 frames
+            print(f"📸 Writing frame {i}/{frame_count}")
 
     # Release the video writer properly
     video_writer.release()
@@ -118,7 +130,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
 
     # Debug: Check if video was generated
     if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
-        print(f"✅ Video successfully generated: {output_file}")
+        print(f"✅ Video successfully generated: {output_file} (Size: {os.path.getsize(output_file)} bytes)")
         return output_file
     else:
         print("❌ Error: Video file was not generated!")
