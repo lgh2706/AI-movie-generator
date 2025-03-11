@@ -110,7 +110,7 @@ if st.button("Generate Movie Script & Image"):
         script_path = os.path.join(GENERATED_DIR, "movie_script.txt")
         image_path = os.path.join(GENERATED_DIR, "movie_scene.png")
     else:
-    pass
+    # No action needed, skipping generation
         pass
         if user_prompt:
             script_path = generate_movie_script(user_prompt)
