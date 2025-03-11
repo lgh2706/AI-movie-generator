@@ -1,4 +1,3 @@
-
 import os
 import openai
 import streamlit as st
@@ -25,15 +24,12 @@ if "movie_script" not in st.session_state:
     st.session_state.movie_script = ""
 if "movie_image_url" not in st.session_state:
     st.session_state.movie_image_url = ""
-if "movie_image_path" not in st.session_state:
-    st.session_state.movie_image_path = ""  # ✅ Initialize movie_image_path
 if "audio_file" not in st.session_state:
     st.session_state.audio_file = ""
 if "music_file" not in st.session_state:
     st.session_state.music_file = ""
 if "video_file" not in st.session_state:
     st.session_state.video_file = ""
-
 
 # Function to generate movie script using OpenAI GPT-4
 def generate_movie_script(user_prompt):
@@ -90,43 +86,42 @@ if not os.path.exists(GENERATED_DIR):
 RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 
 # ✅ Function to generate AI video using Runway Gen-2
-def generate_ai_video(output_file="ai_movie_trailer.mp4"):
+def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation with Runway Gen-2...")
 
-    # ✅ Ensure the locally saved image file exists
-    image_path = os.path.join(GENERATED_DIR, "movie_scene.png")
-    if not os.path.exists(image_path):
-        print(f"❌ Error: Image file not found at {image_path}")
+    # ✅ Ensure the image URL is HTTPS
+    if not image_url.startswith("https://"):
+        print(f"❌ Error: Invalid image URL → {image_url}")
         return None
 
-    print(f"🔍 Using local image file: {image_path}")
-
-    # ✅ Convert local image to a base64 Data URI (required by Runway)
-    with open(image_path, "rb") as image_file:
-        encoded_image = base64.b64encode(image_file.read()).decode()
-    data_uri = f"data:image/png;base64,{encoded_image}"
+    # ✅ Check if the image is accessible
+    print(f"🔍 Verifying image URL: {image_url}")
+    image_check = requests.head(image_url)
+    if image_check.status_code != 200:
+        print(f"❌ Error: Image URL returned {image_check.status_code}, not 200 OK")
+        return None
 
     # ✅ Correct API endpoint for image-to-video generation
     runway_url = "https://api.runwayml.com/v1/video/generate"
 
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
-        "Runway-Version": "2024-11-06",
+        "Runway-Version": "2024-11-06",  # ✅ Ensure correct API version
         "Content-Type": "application/json"
     }
 
     data = {
-        "prompt": "A cinematic AI-generated sci-fi movie scene",
+        "prompt": "A cinematic AI-generated sci-fi movie scene",  # AI-generated video description
         "promptImage": [
             {
-                "uri": data_uri,  # ✅ Use base64-encoded image
+                "uri": image_url,  # ✅ Ensure valid image URL is provided
                 "position": "first"
             }
         ],
-        "ratio": "1280:768",
-        "motion": "cinematic",
-        "duration": 10,
-        "fps": 24
+        "ratio": "1280:768",  # ✅ Ensure correct resolution format
+        "motion": "cinematic",  # ✅ Motion type
+        "duration": 10,  # ✅ 10 seconds
+        "fps": 24  # ✅ Frames per second
     }
 
     print("🚀 Sending request to Runway API...")
@@ -166,51 +161,32 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
 
 
 
-
 # Streamlit UI
-st.title("🎬 Neural Flicks")
-st.subheader("Generate AI-powered movie scripts & movie trailer!")
+st.title("🎬 AI Movie Generator")
+st.subheader("Generate AI-powered movie scripts with visuals, narration & Movie trailer!")
 
 # User input for movie idea
 user_prompt = st.text_input("Enter your movie idea:", "A cyberpunk heist thriller")
 
 if st.button("Generate Movie Script & Image"):
     if user_prompt:
-        # ✅ Generate and store the movie script
-        script_text = generate_movie_script(user_prompt)
-        if script_text:
-            st.session_state.movie_script = script_text
-            script_filename = os.path.join(GENERATED_DIR, "movie_script.txt")
-            with open(script_filename, "w", encoding="utf-8") as script_file:
-                script_file.write(script_text)
-            print(f"✅ Movie script saved: {script_filename}")
-        else:
-            print("❌ Error: Movie script generation failed.")
-
-     
-        # ✅ Generate and store the AI-generated scene image
+        # Generate and store the movie script
+        st.session_state.movie_script = generate_movie_script(user_prompt)
+        
+        # Generate and store the AI-generated scene image
         image_prompt = f"An epic scene from the movie: {user_prompt}"
-        image_url = generate_movie_image(image_prompt)
+        st.session_state.movie_image_url = generate_movie_image(image_prompt)
 
-        # ✅ Download and save the image locally
-        image_filename = os.path.join(GENERATED_DIR, "movie_scene.png")
-        image_response = requests.get(image_url, stream=True)
-        if image_response.status_code == 200:
-            with open(image_filename, "wb") as image_file:
-                image_file.write(image_response.content)
-            print(f"✅ AI-generated image saved: {image_filename}")
-            st.session_state.movie_image_path = image_filename  # Store local path instead of URL
-        else:
-            print("❌ Error: Failed to download AI-generated image.")
-            st.session_state.movie_image_path = ""
+        # Generate AI voice narration
+        st.session_state.audio_file = generate_voice_narration(st.session_state.movie_script)
 
-# ✅ Display the stored script
+# Display the stored script
 if st.session_state.movie_script:
     st.text_area("Generated Movie Script", st.session_state.movie_script, height=400)
 
-# ✅ Display the locally saved image
-if st.session_state.movie_image_path and os.path.exists(st.session_state.movie_image_path):
-    st.image(st.session_state.movie_image_path, caption="AI-Generated Movie Scene", use_container_width=True)
+# Display the stored image
+if st.session_state.movie_image_url:
+    st.image(st.session_state.movie_image_url, caption="AI-Generated Movie Scene", use_container_width=True)
 
 
 
@@ -226,11 +202,11 @@ if st.session_state.audio_file:
 if st.button("Generate AI Movie Trailer"):
     print("🎬 'Generate AI Movie Trailer' button clicked!")
 
-    if st.session_state.movie_image_path and os.path.exists(st.session_state.movie_image_path):
+    if st.session_state.movie_image_url:
         print("✅ Movie image exists! Sending to Runway Gen-2 for video generation...")
 
         # ✅ Generate the video using Runway API
-        video_path = generate_ai_video(st.session_state.movie_image_path)
+        video_path = generate_ai_video(st.session_state.movie_image_url)
 
         # ✅ Debug: Check if the video file exists
         if video_path and os.path.exists(video_path):
@@ -250,9 +226,8 @@ if st.button("Generate AI Movie Trailer"):
             st.warning("Failed to generate AI video. Please try again.")
 
     else:
-        print("❌ No movie image found! Can't generate video.")
-        st.warning("Generate an image first!")
-
+        print("❌ No movie script found! Can't generate video.")
+        st.warning("Generate a movie script first!")
 
 
 
