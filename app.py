@@ -11,6 +11,7 @@ import cv2
 import time
 import numpy as np
 from pydub import AudioSegment
+import base64
 
 # Load API keys from environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
