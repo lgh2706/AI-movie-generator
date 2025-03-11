@@ -58,18 +58,23 @@ def generate_movie_image(prompt):
     image_url = response.data[0].url  # ✅ Get the generated image URL
     print(f"✅ AI-generated image URL: {image_url}")
 
-    # ✅ Save the image in `generated_files/`
+    # ✅ Save the image locally in `generated_files/`
     image_path = os.path.join(GENERATED_DIR, "movie_scene.png")
-    image_response = requests.get(image_url, stream=True)
-    if image_response.status_code == 200:
-        with open(image_path, "wb") as f:
-            f.write(image_response.content)
-        print(f"✅ AI-generated image saved: {image_path}")
-    else:
-        print("❌ Error: Failed to download AI-generated image.")
-        image_path = None  # Prevent using a missing image
 
-    return image_path
+    if image_url.startswith("https://"):  # ✅ Ensure it's a valid HTTPS URL
+        image_response = requests.get(image_url, stream=True)
+        if image_response.status_code == 200:
+            with open(image_path, "wb") as f:
+                f.write(image_response.content)
+            print(f"✅ AI-generated image saved: {image_path}")
+            return image_path  # ✅ Return the local file path
+        else:
+            print("❌ Error: Failed to download AI-generated image.")
+            return None
+    else:
+        print("❌ Error: Invalid image URL returned by OpenAI.")
+        return None
+
 
 
 # Function to generate AI voice narration using ElevenLabs
