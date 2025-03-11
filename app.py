@@ -183,20 +183,21 @@ if st.button("Generate AI Movie Trailer"):
     if st.session_state.movie_image_url:
         print("✅ Image exists! Calling generate_ai_video()...")
         
-        # Call video generation function
+        # Generate the video
         st.session_state.video_file = generate_ai_video(st.session_state.movie_image_url)
 
-        # Check if video was actually generated
+        # Ensure video was actually created
         if st.session_state.video_file and os.path.exists(st.session_state.video_file):
-            print(f"✅ Video successfully generated: {st.session_state.video_file}")
+            print(f"✅ Video successfully generated: {st.session_state.video_file} (Size: {os.path.getsize(st.session_state.video_file)} bytes)")
             st.video(st.session_state.video_file)
         else:
-            print("❌ Video generation failed!")
+            print("❌ Video generation failed or file not found!")
             st.warning("Failed to generate video. Please try again.")
 
     else:
         print("❌ No image found! Can't generate video.")
         st.warning("Generate an image first!")
+
 
 
 
