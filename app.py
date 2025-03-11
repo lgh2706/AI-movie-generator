@@ -34,7 +34,6 @@ if "music_file" not in st.session_state:
 if "video_file" not in st.session_state:
     st.session_state.video_file = ""
 
-
 # Function to generate movie script using OpenAI GPT-4
 def generate_movie_script(user_prompt):
     response = openai.chat.completions.create(
@@ -71,7 +70,6 @@ def generate_movie_image(prompt):
 
     return image_path
 
-
 # Function to generate AI voice narration using ElevenLabs
 def generate_voice_narration(text):
     audio = elevenlabs.generate(
@@ -87,12 +85,6 @@ def generate_voice_narration(text):
         f.write(audio)
 
     return audio_file
-
-
-
-import requests
-import os
-import time
 
 # Define the base directory for generated files
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -123,7 +115,7 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
     data_uri = f"data:image/png;base64,{encoded_image}"
 
     # ✅ Correct API endpoint for image-to-video generation
-        runway_url = "https://api.runwayml.com/v1/image-to-video"
+    runway_url = "https://api.runwayml.com/v1/image-to-video"
 
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
@@ -173,17 +165,7 @@ def generate_ai_video(output_file="ai_movie_trailer.mp4"):
         print(f"🔴 API Response: {response.text}")
         return None
 
-
-
-
-
-
-
-
-
-
-
-# Streamlit UI
+# ✅ Streamlit UI
 st.title("🎬 Neural Flicks")
 st.subheader("Generate AI-powered movie scripts & movie trailer!")
 
@@ -192,33 +174,17 @@ user_prompt = st.text_input("Enter your movie idea:", "A cyberpunk heist thrille
 
 if st.button("Generate Movie Script & Image"):
     if user_prompt:
-        # ✅ Generate and store the movie script
-        script_text = generate_movie_script(user_prompt)
-        if script_text:
-            st.session_state.movie_script = script_text
-            script_filename = os.path.join(GENERATED_DIR, "movie_script.txt")
-            with open(script_filename, "w", encoding="utf-8") as script_file:
-                script_file.write(script_text)
-            print(f"✅ Movie script saved: {script_filename}")
-        else:
-            print("❌ Error: Movie script generation failed.")
+        # ✅ Generate movie script
+        st.session_state.movie_script = generate_movie_script(user_prompt)
+        
+        # ✅ Save the script as a .txt file
+        script_filename = os.path.join(GENERATED_DIR, "movie_script.txt")
+        with open(script_filename, "w", encoding="utf-8") as script_file:
+            script_file.write(st.session_state.movie_script)
+        print(f"✅ Movie script saved: {script_filename}")
 
-     
-        # ✅ Generate and store the AI-generated scene image
-        image_prompt = f"An epic scene from the movie: {user_prompt}"
-        image_url = generate_movie_image(image_prompt)
-
-        # ✅ Download and save the image locally
-        image_filename = os.path.join(GENERATED_DIR, "movie_scene.png")
-        image_response = requests.get(image_url, stream=True)
-        if image_response.status_code == 200:
-            with open(image_filename, "wb") as image_file:
-                image_file.write(image_response.content)
-            print(f"✅ AI-generated image saved: {image_filename}")
-            st.session_state.movie_image_path = image_filename  # Store local path instead of URL
-        else:
-            print("❌ Error: Failed to download AI-generated image.")
-            st.session_state.movie_image_path = ""
+        # ✅ Generate and save AI-generated image
+        st.session_state.movie_image_path = generate_movie_image(user_prompt)
 
 # ✅ Display the stored script
 if st.session_state.movie_script:
@@ -228,52 +194,8 @@ if st.session_state.movie_script:
 if st.session_state.movie_image_path and os.path.exists(st.session_state.movie_image_path):
     st.image(st.session_state.movie_image_path, caption="AI-Generated Movie Scene", use_container_width=True)
 
-
-
-
-# Play AI voice narration
-if st.session_state.audio_file:
+# ✅ Play AI voice narration (if file exists)
+if st.session_state.audio_file and os.path.exists(st.session_state.audio_file):
     st.audio(st.session_state.audio_file, format="audio/mp3")
-
-
-
-
-# Generate and play AI movie trailer
-if st.button("Generate AI Movie Trailer"):
-    print("🎬 'Generate AI Movie Trailer' button clicked!")
-
-    if st.session_state.movie_image_path and os.path.exists(st.session_state.movie_image_path):
-        print("✅ Movie image exists! Sending to Runway Gen-2 for video generation...")
-
-        # ✅ Generate the video using Runway API
-        video_path = generate_ai_video(st.session_state.movie_image_path)
-
-        # ✅ Debug: Check if the video file exists
-        if video_path and os.path.exists(video_path):
-            file_size = os.path.getsize(video_path)
-            print(f"✅ AI-generated video found: {video_path} (Size: {file_size} bytes)")
-
-            # ✅ Play the video in Streamlit
-            with open(video_path, "rb") as video_file:
-                video_bytes = video_file.read()
-                st.video(video_bytes)
-
-            # ✅ Provide a download button for the video
-            st.download_button("📥 Download AI Movie Trailer", video_bytes, file_name="ai_movie_trailer.mp4", mime="video/mp4")
-
-        else:
-            print("❌ AI video generation failed!")
-            st.warning("Failed to generate AI video. Please try again.")
-
-    else:
-        print("❌ No movie image found! Can't generate video.")
-        st.warning("Generate an image first!")
-
-
-
-
-
-
-
 
 st.markdown("🚀 *Powered by OpenAI GPT-4, DALL·E 3, ElevenLabs, and Runway AI*")
