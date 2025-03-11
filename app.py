@@ -89,27 +89,42 @@ RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY")
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation with Runway Gen-2...")
 
+    # ✅ Print the image URL for debugging
+    print(f"🔍 Image URL being sent to Runway API: {image_url}")
+
+    # ✅ Ensure the image URL is HTTPS
+    if not image_url.startswith("https://"):
+        print("❌ Error: Image URL must use HTTPS!")
+        return None
+
+    # ✅ Check if the image is accessible
+    print(f"🔍 Verifying image URL: {image_url}")
+    image_check = requests.head(image_url)
+    if image_check.status_code != 200:
+        print(f"❌ Error: Image URL returned {image_check.status_code}, not 200 OK")
+        return None
+
     # ✅ Correct API endpoint for image-to-video generation
     runway_url = "https://api.runwayml.com/v1/video/generate"
     
     headers = {
         "Authorization": f"Bearer {RUNWAY_API_KEY}",
-        "Runway-Version": "2024-11-06",  # ✅ Set API Version
+        "Runway-Version": "2024-11-06",  # ✅ Ensure correct API version
         "Content-Type": "application/json"
     }
     
     data = {
-        "prompt": "A cinematic AI-generated sci-fi movie scene",  # AI-generated video description
+        "prompt": "A cinematic AI-generated sci-fi movie scene",
         "promptImage": [
             {
-                "uri": image_url,  # AI-generated image URL for the video
+                "uri": image_url,  # ✅ Ensure valid image URL is provided
                 "position": "first"
             }
         ],
-        "ratio": "1280:768",  # Correct resolution format
-        "motion": "cinematic",  # Motion type
-        "duration": 10,  # 10 seconds
-        "fps": 24  # Frames per second
+        "ratio": "1280:768",
+        "motion": "cinematic",
+        "duration": 10,
+        "fps": 24
     }
 
     print("🚀 Sending request to Runway API...")
@@ -137,13 +152,9 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
             return None
     else:
         print(f"❌ Runway API request failed. Response Code: {response.status_code}")
-        try:
-            error_details = response.json()
-            print(f"🔴 API Response: {error_details}")
-        except Exception:
-            print("🔴 Failed to parse error details. Raw response:")
-            print(response.text)
+        print(f"🔴 API Response: {response.text}")
         return None
+
 
 
 
