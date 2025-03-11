@@ -74,7 +74,7 @@ import cv2
 import requests
 import os
 import time
-from datetime import datetime
+import shutil  # ✅ Import shutil to move files
 
 # Define the base directory for generated files
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -88,17 +88,17 @@ if not os.path.exists(GENERATED_DIR):
 def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     print("🎬 Starting AI video generation (Video only)...")
 
-    # ✅ Set paths
-    image_filename = f"image_{int(time.time())}.jpg"  # Unique filename for images
-    image_path = os.path.join(GENERATED_DIR, image_filename)
-    video_path = os.path.join(GENERATED_DIR, output_file)  # Always overwrite this video
+    # ✅ Save in a temporary location first
+    temp_video_path = os.path.join("/tmp/", output_file)
+    final_video_path = os.path.join(GENERATED_DIR, output_file)  # ✅ This will be the final path
 
-    print(f"📌 Saving image as: {image_path}")
-    print(f"📌 Using output filename for video: {video_path}")
+    print(f"📌 Using temporary video path: {temp_video_path}")
+    print(f"📌 Final video will be stored at: {final_video_path}")
 
     # ✅ Download AI-generated image
     image_response = requests.get(image_url, stream=True)
     if image_response.status_code == 200:
+        image_path = os.path.join(GENERATED_DIR, "ai_scene.jpg")
         with open(image_path, "wb") as f:
             f.write(image_response.content)
         print("✅ AI-generated image saved successfully!")
@@ -121,7 +121,7 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
 
     # ✅ Create a video writer
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(video_path, fourcc, video_fps, (width, height))
+    video_writer = cv2.VideoWriter(temp_video_path, fourcc, video_fps, (width, height))
 
     # ✅ Check if video writer was properly initialized
     if not video_writer.isOpened():
@@ -138,13 +138,15 @@ def generate_ai_video(image_url, output_file="ai_movie_trailer.mp4"):
     video_writer.release()
     time.sleep(2)  # Ensure the file is written before proceeding
 
-    # ✅ Debug: Check if video was generated
-    if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
-        print(f"✅ Video successfully generated: {video_path} (Size: {os.path.getsize(video_path)} bytes)")
-        return video_path  # Return full path to video
+    # ✅ Move the video from `/tmp/` to `/generated_files/`
+    if os.path.exists(temp_video_path) and os.path.getsize(temp_video_path) > 0:
+        shutil.move(temp_video_path, final_video_path)
+        print(f"✅ Video successfully moved to: {final_video_path} (Size: {os.path.getsize(final_video_path)} bytes)")
+        return final_video_path  # ✅ Return new path
     else:
         print("❌ Error: Video file was not generated!")
         return None
+
 
 
 
@@ -188,8 +190,6 @@ if st.session_state.audio_file:
 
 
 # Generate and play AI movie trailer
-import os
-
 if st.button("Generate AI Movie Trailer"):
     print("🎬 'Generate AI Movie Trailer' button clicked!")
 
@@ -199,15 +199,14 @@ if st.button("Generate AI Movie Trailer"):
         # ✅ Generate the video and store the full file path
         video_path = generate_ai_video(st.session_state.movie_image_url)
 
-        # ✅ Ensure video was actually created
+        # ✅ Debug: Check if the video file exists
         if video_path and os.path.exists(video_path):
             file_size = os.path.getsize(video_path)
             print(f"✅ Video file found: {video_path} (Size: {file_size} bytes)")
 
-            # ✅ Open and read the video as bytes
-            with open(video_path, "rb") as video_file:
-                video_bytes = video_file.read()
-                st.video(video_bytes)
+            # ✅ Use direct file path instead of bytes
+            st.session_state.video_file = video_path
+            st.video(video_path)
 
         else:
             print("❌ Video generation failed or file not found!")
@@ -216,6 +215,7 @@ if st.button("Generate AI Movie Trailer"):
     else:
         print("❌ No image found! Can't generate video.")
         st.warning("Generate an image first!")
+
 
 
 
